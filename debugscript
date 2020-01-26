@@ -1,0 +1,2 @@
+LOAD spetris.rom,3F00
+PC=3F00
