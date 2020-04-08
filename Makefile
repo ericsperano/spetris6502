@@ -14,9 +14,9 @@
 all:
 	Merlin32 -V . beep.s
 	rm -f beep.po
-	java -jar ~/Documents/Apple\ II/Downloads/AppleCommander-ac-1.6.0.jar -pro140 beep.po BEEP
-	java -jar ~/Documents/Apple\ II/Downloads/AppleCommander-ac-1.6.0.jar -p beep.po beep bin 0x300 < beep
-	java -jar ~/Documents/Apple\ II/Downloads/AppleCommander-ac-1.6.0.jar -l beep.po
+	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -pro140 beep.po BEEP
+	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -p beep.po beep bin 0x300 < beep
+	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -l beep.po
 
 run:
 	osascript "virtual_emulation.scpt"
