@@ -1,39 +1,48 @@
-SHELL=/bin/bash -o pipefail
-DSK:=spetris.dsk
-SRC := spetris.asm
-ASM := lwasm
-ASM_FLAGS := -9bl -p cd
-OBJ := ${SRC:asm=bin}
-ROM := ${SRC:asm=rom}
-MAME := mame
-MAME_ARGS := coco3 -window -nomax -flop1
+#SHELL=/bin/bash -o pipefail
+#DSK:=spetris.dsk
+#SRC := spetris.asm
+#ASM := lwasm
+#ASM_FLAGS := -9bl -p cd
+#OBJ := ${SRC:asm=bin}
+#ROM := ${SRC:asm=rom}
+#MAME := mame
+#MAME_ARGS := coco3 -window -nomax -flop1
 
-.PHONY: all
+#.PHONY: all
 
-all: $(DSK)
+#all: $(DSK)
+all:
+	Merlin32 -V . beep.s
+	rm -f beep.po
+	java -jar ~/Documents/Apple\ II/Downloads/AppleCommander-ac-1.6.0.jar -pro140 beep.po BEEP
+	java -jar ~/Documents/Apple\ II/Downloads/AppleCommander-ac-1.6.0.jar -p beep.po beep bin 0x300 < beep
+	java -jar ~/Documents/Apple\ II/Downloads/AppleCommander-ac-1.6.0.jar -l beep.po
 
-$(DSK) : $(OBJ)
-	rm -f $(DSK)
-	decb dskini $(DSK)
-	decb copy -0 -a -t -r autoexec.bas $(DSK),AUTOEXEC.BAS
-	decb copy -0 -a -t -r autoexec.bas $(DSK),SPETRIS.BAS
-	decb copy -2 -b -r $(SRC) $(DSK),SPETRIS.ASM
-	decb copy -2 -b -r $(OBJ) $(DSK),SPETRIS.BIN
+run:
+	osascript "virtual_emulation.scpt"
 
-%.bin: %.asm Makefile
-	$(ASM) $(ASM_FLAGS) -o $@ $< | tee $<.log
+#$(DSK) : $(OBJ)
+#	rm -f $(DSK)
+#	decb dskini $(DSK)
+#	decb copy -0 -a -t -r autoexec.bas $(DSK),AUTOEXEC.BAS
+#	decb copy -0 -a -t -r autoexec.bas $(DSK),SPETRIS.BAS
+#	decb copy -2 -b -r $(SRC) $(DSK),SPETRIS.ASM
+#	decb copy -2 -b -r $(OBJ) $(DSK),SPETRIS.BIN
 
-%.rom: %.asm Makefile 
-	$(ASM) -9 -p cd -r -o $@ $< 
-	
-run: all
-	$(MAME) $(MAME_ARGS) $(DSK)
+#%.bin: %.asm Makefile
+#	$(ASM) $(ASM_FLAGS) -o $@ $< | tee $<.log
 
-debug: $(ROM)
-	$(MAME) -debug -debugscript debugscript coco3 -skip_gameinfo -ui_active -window -nomax
+#%.rom: %.asm Makefile
+#	$(ASM) -9 -p cd -r -o $@ $<
 
-copy: all
-	cp $(DSK) /Volumes/COCO3/
+#run: all
+#	$(MAME) $(MAME_ARGS) $(DSK)
 
-clean:
-	@rm -rfv $(DSK) $(OBJ) $(ROM) *.log
+#debug: $(ROM)
+#	$(MAME) -debug -debugscript debugscript coco3 -skip_gameinfo -ui_active -window -nomax
+
+#copy: all
+#	cp $(DSK) /Volumes/COCO3/
+
+#clean:
+#	@rm -rfv $(DSK) $(OBJ) $(ROM) *.log
