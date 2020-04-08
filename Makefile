@@ -1,39 +1,47 @@
 SHELL=/bin/bash -o pipefail
-DSK:=spetris.dsk
-SRC := spetris.asm
-ASM := lwasm
-ASM_FLAGS := -9bl -p cd
-OBJ := ${SRC:asm=bin}
-ROM := ${SRC:asm=rom}
-MAME := mame
-MAME_ARGS := coco3 -window -nomax -flop1
+AC:=java -jar ~/bin/AppleCommander-ac-1.6.0.jar
+PRODOS_DSK:=spetris.po
+DOS_DSK:=spetris.dsk
+ASM := Merlin32
+ASM_FLAGS := -V
+SRC = *.s macro/*.s
+OBJ := spetris spetrisb
 
 .PHONY: all
 
-all: $(DSK)
+all: $(PRODOS_DSK) $(DOS_DSK)
 
-$(DSK) : $(OBJ)
-	rm -f $(DSK)
-	decb dskini $(DSK)
-	decb copy -0 -a -t -r autoexec.bas $(DSK),AUTOEXEC.BAS
-	decb copy -0 -a -t -r autoexec.bas $(DSK),SPETRIS.BAS
-	decb copy -2 -b -r $(SRC) $(DSK),SPETRIS.ASM
-	decb copy -2 -b -r $(OBJ) $(DSK),SPETRIS.BIN
+spetris: $(SRC)
+	$(ASM) $(ASM_FLAGS) macro spetris.s
 
-%.bin: %.asm Makefile
-	$(ASM) $(ASM_FLAGS) -o $@ $< | tee $<.log
+spetrisb: $(SRC)
+	$(ASM) $(ASM_FLAGS) macro spetrisb.s
 
-%.rom: %.asm Makefile 
-	$(ASM) -9 -p cd -r -o $@ $< 
-	
-run: all
-	$(MAME) $(MAME_ARGS) $(DSK)
+# TODO
+#$(PRODOS_DSK): clean_prodos $(OBJ)
+$(PRODOS_DSK): $(OBJ)
+	$(AC) -pro140 $(PRODOS_DSK) SPETRIS
+	$(AC) -p $(PRODOS_DSK) spetris bin 0x2000 < spetris
+	$(AC) -p $(PRODOS_DSK) spetrisb bin 0x2000 < spetrisb
 
-debug: $(ROM)
-	$(MAME) -debug -debugscript debugscript coco3 -skip_gameinfo -ui_active -window -nomax
+#$(DOS_DSK): clean_dos $(OBJ)
+$(DOS_DSK): $(OBJ)
+	$(AC) -dos140 $(DOS_DSK) SPETRIS
+	$(AC) -p $(DOS_DSK) spetris bin 0x2000 < spetris
+	$(AC) -p $(DOS_DSK) spetrisb bin 0x2000 < spetrisb
+
+run:
+	osascript "virtual_emulation.scpt"
 
 copy: all
-	cp $(DSK) /Volumes/COCO3/
+	cp $(PRODOS_DSK) /Volumes/APPLE\ II/SPETRIS.po
+	cp $(DOS_DSK) /Volumes/APPLE\ II/SPETRIS.dsk
 
-clean:
-	@rm -rfv $(DSK) $(OBJ) $(ROM) *.log
+clean_prodos:
+	@rm -rfv $(PRODOS_DSK)
+
+clean_dos:
+	@rm -rfv $(DOS_DSK)
+
+clean: clean_prodos clean_dos
+	@rm -rfv  $(OBJ) _FileInformation.txt *.log Spetris*_Output.txt *.o

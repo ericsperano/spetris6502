@@ -1,5 +1,11 @@
-roms
-spetris.asm.log
-spetris.bin
-spetris.rom
-cfg
+*.bin
+*.dsk
+*.lst
+*.o
+*.po
+_FileInformation.txt
+Spetris
+Spetris_Output.txt
+Spetrisb
+Spetrisb_Output.txt
+error_output.txt
