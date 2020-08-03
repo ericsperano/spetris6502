@@ -11,11 +11,22 @@ LOOP        LDA     Intro,X
             STA     $400,Y
             INX
             INY
-            CPY     #120
+            CPY     #240
             BNE     LOOP
             RTS
 
-Intro       ASC     "             S P E T R I S !            "      ; 1
+Intro       ASC     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            ASC     "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+            ASC     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+            ASC     "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+            ASC     "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+            ASC     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+            ASC     "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
+            ASC     "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
+            ASC     "IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"
+            ASC     "JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ"
+
+            ASC     "             S P E T R I S !            "      ; 1
             ASC     "                                        "      ; 2
             ASC     "Choose Display Mode:                    "      ; 3
             ASC     "                                        "      ; 4
