@@ -19,7 +19,7 @@ run:
 	osascript "virtual_emulation.scpt"
 
 copy: all
-	cp $(DSK) /Volumes/APPLE\ II/ALINES.po
+	cp $(DSK) /Volumes/APPLE\ II/SPETRIS.po
 
 clean:
 	@rm -rfv $(DSK) $(OBJ) _FileInformation.txt *.log
