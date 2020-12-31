@@ -13,7 +13,7 @@ spetris:
 
 $(DSK): clean $(OBJ)
 	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -pro140 $(DSK) SPETRIS
-	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -p $(DSK) spetris bin 0x800 < spetris
+	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -p $(DSK) spetris bin 0x2000 < spetris
 
 run:
 	osascript "virtual_emulation.scpt"

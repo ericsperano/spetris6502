@@ -1,87 +1,97 @@
 * SPETRIS FOR APPLE II COMPUTERS
-                ORG     $2000
+                org $2000
+KYBD            equ $c000
+STROBE          equ $c010
+HOME            equ $fc58
+TEXTON          equ $c051
+80COLOFF        equ $c00c
+80COLON         equ $c00d
+PTR1            equ $06
+PTR2            equ $08
+PTR3            equ $1d
+PTR4            equ $ce
+PTR5            equ $eb
+PTR6            equ $ed
+PTR_ScreenPos   equ $fa
+PTR_DisplayLine equ $fc
 *
-HOME            EQU     $FC58
-TEXTON          EQU     $C051
-80COLOFF        EQU     $C00C
-80COLON         EQU     $C00D
-PTR1            EQU     $06
-PTR2            EQU     $08
-PTR3            EQU     $1D
-PTR4            EQU     $CE
-PTR5            EQU     $EB
-PTR6            EQU     $ED
-PTR_ScreenPos   EQU     $FA
-PTR_DisplayLine EQU     $FC
-*
-MDisplayLine    MAC
-                LDA     #<]1                    ; lo byte of struct to display
-                STA     PTR_DisplayLine
-                LDA     #>]1                    ; hi byte of struct to display
-                STA     PTR_DisplayLine+1
-                JSR     DisplayLine
+JSRDisplayLine  MAC
+                lda #<]1                    ; lo byte of struct to display
+                sta PTR_DisplayLine
+                lda #>]1                    ; hi byte of struct to display
+                sta PTR_DisplayLine+1
+                jsr DisplayLine
                 <<<
 *
-                STA     80COLOFF
-                STA     TEXTON
-                *STA     80COLOFF
-                JSR     HOME
-                MDisplayLine INTRO00
-                MDisplayLine INTRO01
-                MDisplayLine INTRO02
-                MDisplayLine INTRO03
-                MDisplayLine INTRO04
-                MDisplayLine INTRO05
-                MDisplayLine INTRO06
-                MDisplayLine INTRO07
-                MDisplayLine INTRO08
-                MDisplayLine INTRO09
-END             JMP     END
+                *sta 80COLOFF
+                *sta TEXTON
+                *sta     80COLOFF
+                jsr HOME
+                JSRDisplayLine Splash00
+                JSRDisplayLine Splash01
+                JSRDisplayLine Splash02
+                JSRDisplayLine Splash03
+                JSRDisplayLine Splash04
+                JSRDisplayLine Splash05
+                JSRDisplayLine Splash06
+                JSRDisplayLine Splash07
+                JSRDisplayLine Splash08
+                JSRDisplayLine Splash09
+                JSRDisplayLine Splash10
+                * get key
+LoopAnyKey      lda KYBD
+                cmp #$80
+                bcc LoopAnyKey
+                sta STROBE
+                jsr HOME
+                rts
 *
-DisplayLine     LDY     #$00
-                LDA     (PTR_DisplayLine),Y     ; lo byte of the screen adress
-                STA     PTR_ScreenPos
-                INY
-                LDA     (PTR_DisplayLine),Y     ; hi byte of the screen adress
-                STA     PTR_ScreenPos+1
-                INY
-                LDA     (PTR_DisplayLine),Y     ; string length
-                STA     DLStrLen
-                CLC                             ; clear carry flag
-                LDA     PTR_DisplayLine         ; add 3 to lo byte of struct pointer to point to text to print
-                ADC     #$3
-                STA     PTR_DisplayLine         ; save new lo byte
-                LDA     PTR_DisplayLine+1
-                ADC     #$0                     ; will add 1 if the previous add set the carry flag
-                STA     PTR_DisplayLine+1       ; save hi byte
-                LDY     #$00
-DisplayLineLoop LDA     (PTR_DisplayLine),Y     ; get char to display
-                STA     (PTR_ScreenPos),Y       ; copy to screen
-                INY
-                CPY     DLStrLen
-                BNE     DisplayLineLoop
-                RTS
-DLStrLen        DFB     0 ; use the stack instead?
-
-INTRO00         DFB     $0d,$04,15
-                ASC     "S P E T R I S !"
-INTRO01         DFB     $08,$05,24
-                ASC     "For "
-                DFB     $40
-                ASC     " Apple II Computers"
-INTRO02         DFB     $09,$07,22
-                ASC     "Keyboard Game Controls"
-INTRO03         DFB     $ad,$04,29
-                ASC     "Left Arrow:   Move piece left"
-INTRO04         DFB     $2d,$05,30
-                ASC     "Right Arrow:  Move piece right"
-INTRO05         DFB     $ad,$05,26
-                ASC     "Up Arrow:     Rotate piece"
-INTRO06         DFB     $2d,$06,29
-                ASC     "Down Arrow:   Move piece down"
-INTRO07         DFB     $ad,$06,24
-                ASC     "Space Bar:    Drop piece"
-INTRO08         DFB     $2d,$07,24
-                ASC     "P:            Pause game"
-INTRO09         DFB     $ad,$07,23
-                ASC     "Esc:          Quit game"
+DisplayLine     ldy #$00
+                lda (PTR_DisplayLine),y     ; lo byte of the screen adress
+                sta PTR_ScreenPos
+                iny
+                lda (PTR_DisplayLine),y     ; hi byte of the screen adress
+                sta PTR_ScreenPos+1
+                iny
+                lda (PTR_DisplayLine),y     ; string length
+                sta DLStrLen
+                clc                         ; clear carry flag
+                lda PTR_DisplayLine         ; add 3 to lo byte of struct pointer to point to text
+                adc #$3
+                sta PTR_DisplayLine         ; save new lo byte
+                lda PTR_DisplayLine+1
+                adc #$0                     ; will add 1 if the previous add set the carry flag
+                sta PTR_DisplayLine+1       ; save hi byte
+                ldy #$00
+DisplayLineLoop lda (PTR_DisplayLine),y     ; get char to display
+                sta (PTR_ScreenPos),y       ; copy to screen
+                iny
+                cpy DLStrLen
+                bne DisplayLineLoop
+                rts
+DLStrLen        dfb 0 ; use the stack instead?
+*
+Splash00        dfb $8b,$04,16
+                asc "S P E T R // S !"
+Splash01        dfb $87,$05,24
+                asc "For "
+                dfb $40
+                asc " Apple // Computers"
+Splash02        dfb $30,$04,22
+                asc "Keyboard Game Controls"
+Splash03        dfb $2d,$05,29
+                asc "Left Arrow:   Move Piece Left"
+Splash04        dfb $ad,$05,30
+                asc "Right Arrow:  Move Piece Right"
+Splash05        dfb $2d,$06,26
+                asc "Up Arrow:     Rotate Piece"
+Splash06        dfb $ad,$06,29
+                asc "Down Arrow:   Move Piece Down"
+Splash07        dfb $2d,$07,24
+                asc "Space Bar:    Drop Piece"
+Splash08        dfb $ad,$07,24
+                asc "P:            Pause Game"
+Splash09        dfb $55,$04,23
+                asc "Esc:          Quit Game"
+Splash10        dfb $d8,$06,22
+                asc "Press Any Key To Start"
