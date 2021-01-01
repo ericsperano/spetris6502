@@ -10,10 +10,13 @@ PTR1            equ $06
 PTR2            equ $08
 PTR3            equ $1d
 PTR4            equ $ce
-PTR5            equ $eb
-PTR6            equ $ed
+PTR_Field       equ $eb
+PTR_FieldPos    equ $ed
 PTR_ScreenPos   equ $fa
 PTR_DisplayLine equ $fc
+*
+FIELD_COLS      equ 10
+FIELD_ROWS      equ 10
 *
 JSRDisplayLine  MAC
                 lda #<]1                    ; lo byte of struct to display
@@ -44,8 +47,90 @@ LoopAnyKey      lda KYBD
                 bcc LoopAnyKey
                 sta STROBE
                 jsr HOME
+                jsr DrawScreen
+                jsr DrawField
+LoopAnyKey2     lda KYBD
+                cmp #$80
+                bcc LoopAnyKey2
+                sta STROBE
+                jsr HOME
                 rts
+***
+*** Draw Screen
+***
+DrawScreen      lda #<FieldPositions ; init the zero page pointers
+                sta PTR_FieldPos
+                lda #>FieldPositions
+                sta PTR_FieldPos+1
+                ldy #0
+                ldx #0 ; row counter
+                sty DF_FieldPosY
+DS_Loop0        ldy DF_FieldPosY
+                lda (PTR_FieldPos),y
+                sec
+                sbc #1
+                sta PTR_ScreenPos
+                iny
+                lda (PTR_FieldPos),y
+                sta PTR_ScreenPos+1
+                iny
+                sty DF_FieldPosY
+                ldy #0
+                lda #$3a   ; bar character
+                sta (PTR_ScreenPos),y
+                ldy #FIELD_COLS+1
+                sta (PTR_ScreenPos),y
+                inx
+                cpx #FIELD_ROWS
+                bne DS_Loop0
+                JSRDisplayLine GridBottom
+                rts
+***
+*** Draw Field
+***
+DrawField       lda #<Field ; init the zero page pointers
+                sta PTR_Field
+                lda #>Field
+                sta PTR_Field+1
+                lda #<FieldPositions
+                sta PTR_FieldPos
+                lda #>FieldPositions
+                sta PTR_FieldPos+1
+                ldy #0
+                ldx #0 ; row counter
+                sty DF_FieldPosY
+                * initialize the screen pointer
+DF_Loop1        ldy DF_FieldPosY
+                lda (PTR_FieldPos),y
+                sta PTR_ScreenPos
+                iny
+                lda (PTR_FieldPos),y
+                sta PTR_ScreenPos+1
+                iny
+                sty DF_FieldPosY ; save y for field pos
+                ldy #0
+DF_Loop0        lda (PTR_Field),y
+                sta (PTR_ScreenPos),y
+                iny
+                cpy #FIELD_COLS
+                bne DF_Loop0
+                inx
+                cpx #FIELD_ROWS
+                beq DF_End
+                clc                              ; clear carry flag
+                lda PTR_Field         ; add 3 to lo byte of struct pointer to point to text to print
+                adc #FIELD_COLS
+                sta PTR_Field
+                lda PTR_Field+1
+                adc #0
+                sta PTR_Field+1
+                jmp DF_Loop1
+DF_End          rts
 *
+DF_FieldPosY    dfb 0
+*
+***
+***
 DisplayLine     ldy #$00
                 lda (PTR_DisplayLine),y     ; lo byte of the screen adress
                 sta PTR_ScreenPos
@@ -71,6 +156,26 @@ DisplayLineLoop lda (PTR_DisplayLine),y     ; get char to display
                 rts
 DLStrLen        dfb 0 ; use the stack instead?
 *
+Field           asc "A         "
+                asc " B        "
+                asc "  C       "
+                asc "          "
+                asc "          "
+                asc "          "
+                asc "   EE     "
+                asc "  DD   FFF"
+                asc " CC    FFF"
+                asc "BABABA FFF"
+FieldPositions  dfb $01,$04
+                dfb $81,$04
+                dfb $01,$05
+                dfb $81,$05
+                dfb $01,$06
+                dfb $81,$06
+                dfb $01,$07
+                dfb $81,$07
+                dfb $29,$04
+                dfb $a9,$04
 Splash00        dfb $8b,$04,16
                 asc "S P E T R // S !"
 Splash01        dfb $87,$05,24
@@ -95,3 +200,5 @@ Splash09        dfb $55,$04,23
                 asc "Esc:          Quit Game"
 Splash10        dfb $d8,$06,22
                 asc "Press Any Key To Start"
+GridBottom      dfb $28,$05,12
+                asc '::::::::::::'
