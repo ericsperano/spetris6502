@@ -48,14 +48,29 @@ LoopAnyKey      lda KYBD
                 sta STROBE
                 jsr HOME
                 jsr DrawScreen
-                jsr DrawField
+loopDraw0       jsr DrawField
                 jsr DrawPiece
 LoopAnyKey2     lda KYBD
                 cmp #$80
                 bcc LoopAnyKey2
                 *
                 sta STROBE
-                jsr HOME
+                cmp #$8b ; arrow up
+                bne testEscKey
+                * TODO JSR FOR ROTATION
+                ldx PieceRot
+                bne decRot
+                ldx #3
+                jmp storeRot
+decRot          dex
+storeRot        stx PieceRot
+                *plx
+                jmp loopDraw0
+testEscKey      cmp #$9b ; esc
+                beq endgame
+                *plx             ; TODO why is it necessary?
+                jmp loopDraw0 ;loop back TODO relative instead of jmp?
+endgame         jsr HOME
                 rts
 ***
 *** Set PTR_Piece according to PieceId and PieceRot
