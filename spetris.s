@@ -41,11 +41,27 @@ InitPtrPiece    MAC
                 <<<
                 * BEGIN PROGRAM
                 jsr SplashScreen
+                jsr NewGame
                 jsr HOME
                 jsr DrawScreen
-loopDraw0       jsr DrawField
+loopDraw0       jsr NewRound
+                jsr DrawField
                 jsr DrawPiece
-LoopAnyKey2     lda KYBD
+LoopAnyKey2     lda SleepCounterLo
+                clc
+                adc #1
+                sta SleepCounterLo
+                lda SleepCounterHi
+                adc #0
+                sta SleepCounterHi
+                *cmp #0
+                bne pollKeyboard
+                lda SleepCounterLo
+                bne pollKeyboard
+                lda #1
+                sta FlagForceDown
+                jmp chkForceDown
+pollKeyboard    lda KYBD
                 cmp #$80
                 bcc LoopAnyKey2
                 *
@@ -61,30 +77,62 @@ decRot          dex
 storeRot        stx TryPieceRot
                 jsr DoesPieceFit
                 ldx PieceFitsFlag
-                beq loopDraw0
+                beq chkForceDown
                 ldx TryPieceRot
                 stx PieceRot
-                jmp loopDraw0
+                jmp chkForceDown
 testLeftKey     cmp #$88 ; arrow left
                 bne testRightKey
                 dec TryPieceX
                 jsr DoesPieceFit
                 ldx PieceFitsFlag
-                beq loopDraw0
+                beq chkForceDown
                 dec PieceX
-                jmp loopDraw0
+                jmp chkForceDown
 testRightKey    cmp #$95 ; arrow right
-                bne testEscKey
+                bne testDownKey
                 inc TryPieceX
                 jsr DoesPieceFit
                 ldx PieceFitsFlag
-                beq loopDraw0
+                beq chkForceDown
                 inc PieceX
-                jmp loopDraw0
+                jmp chkForceDown
+testDownKey     cmp #$8a ; arrow bottom       ; TODO reset the forcedown
+                bne testEscKey
+                inc TryPieceY
+                jsr DoesPieceFit
+                ldx PieceFitsFlag
+                beq chkForceDown
+                inc PieceY
+                jmp chkForceDown
 testEscKey      cmp #$9b ; esc
                 beq endgame
                 jmp loopDraw0 ;loop back TODO relative instead of jmp?
+chkForceDown    lda chkForceDown
+                beq endLoopRound
+                inc TryPieceY
+                jsr DoesPieceFit
+                ldx PieceFitsFlag
+                beq endLoopRound
+                inc PieceY
+endLoopRound    jmp loopDraw0
 endgame         jsr HOME
+                rts
+***
+***
+***
+NewGame         lda #0
+                sta PieceId
+                sta PieceY
+                sta PieceRot
+                lda #5
+                sta PieceX
+                rts
+NewRound        lda #0
+                sta SleepCounterLo
+                sta FlagForceDown
+                lda #$b0
+                sta SleepCounterHi
                 rts
 ***
 *** Set PTR_Piece according to PieceId and PieceRot
@@ -538,10 +586,13 @@ Pieces          asc '..X...X...X...X.'   ; rotation 0 piece 0
                 asc '.....X...XXX....'   ; rotation 1
                 asc '.....XX..X...X..'   ; rotation 2
                 asc '....XXX...X.....'   ; rotation 3
-PieceId         dfb 1
-PieceX          dfb 5
+PieceId         dfb 0 ; these all get initialized in NewGame
+PieceX          dfb 0
 PieceY          dfb 0
 PieceRot        dfb 0
 TryPieceX       dfb 0
 TryPieceY       dfb 0
 TryPieceRot     dfb 0
+SleepCounterLo  dfb 0
+SleepCounterHi  dfb 0
+FlagForceDown   dfb 0
