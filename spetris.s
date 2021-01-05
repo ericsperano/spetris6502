@@ -39,34 +39,72 @@ InitPtrPiece    MAC
                 lda #>Pieces
                 sta PTR_Piece+1
                 <<<
-                * BEGIN PROGRAM
+                ***
+                ************************* BEGIN PROGRAM *************************
+                ***
                 jsr SplashScreen
-                jsr NewGame
                 jsr HOME
                 jsr DrawScreen
-loopDraw0       jsr NewRound
+startGame       jsr NewGame                     ; initialize new game and screen
+startRound      jsr NewPiece                    ; initialize this round (a round is what handle one piece in the game)
+                jsr CopyPieces
+                jsr DoesPieceFit                ; first check if it would fit
+                ldx FlagPieceFits
+                bne roundLoop                   ; it does, go on with the loop for this round
+                jmp endGame                     ; it does not, game over!
+roundLoop       ldx FlagRefreshScr
+                beq roundSleep
                 jsr DrawField
                 jsr DrawPiece
-LoopAnyKey2     lda SleepCounterLo
-                clc
-                adc #1
-                sta SleepCounterLo
-                lda SleepCounterHi
-                adc #0
-                sta SleepCounterHi
-                *cmp #0
-                bne pollKeyboard
-                lda SleepCounterLo
-                bne pollKeyboard
-                lda #1
-                sta FlagForceDown
-                jmp chkForceDown
-pollKeyboard    lda KYBD
+                ; draw scores
+                dec FlagRefreshScr              ; clear the refresh screen flag
+roundSleep      ldx FlagFalling                 ; is it falling?
+                beq roundSleep1                 ; no, go sleep
+                stx FlagForceDown               ; yes, will force down and refresh screen
+                stx FlagRefreshScr
+roundSleep1     jsr Sleep
+                inc SpeedCount                  ; increment the speed count
+                lda SpeedCount
+                cmp Speed                       ; and force down if it reached speed max
+                bne pollKeyboard                ; if not go straight to poll keyboard
+                ldx #1
+                stx FlagForceDown               ; yes, will force down and refresh screen
+                stx FlagRefreshScr
+                dex
+                stx SpeedCount                  ; reset the speed counter
+pollKeyboard    lda KYBD                        ; polls keyboard
                 cmp #$80
-                bcc LoopAnyKey2
-                *
-                sta STROBE
-                jsr CopyPieces
+                bcc chkForceDown                ; no key pressed
+                jsr KeyPressed                  ; go handle key pressed
+                ldx FlagQuitGame                ; esc pressed?
+                beq chkForceDown                ; no, go on
+                jmp exitGame                    ; yes, exit game
+chkForceDown    ldx FlagForceDown               ; is it time for piece to go down?
+                bne moveDown
+                jmp roundLoop                   ; no
+moveDown        jsr CopyPieces
+                inc TryPieceY                   ; check if it can go further down
+                jsr DoesPieceFit
+                ldx FlagPieceFits
+                beq roundLockPiece              ; it doesnt, we lock
+                inc PieceY
+                dec FlagForceDown               ; clear the flag
+                jmp roundLoop
+roundLockPiece  jsr LockPiece                   ; lock the piece into field
+                jsr CheckForLines               ; check if it has complete lines
+                ldx FlagHasLines
+                beq startRound                  ; no, go get next piece
+                jsr DrawField                   ; yep, draw and sleep for animation
+                ldx #SleepTime
+loopSleep       jsr Sleep
+                dex
+                bne loopSleep
+                jsr RemoveLines                 ; animation displayed, remove the lines from the field
+                jmp startRound
+***
+***
+***
+KeyPressed      sta STROBE
                 cmp #$8b ; arrow up
                 bne testLeftKey
                 ldx PieceRot
@@ -76,63 +114,73 @@ pollKeyboard    lda KYBD
 decRot          dex
 storeRot        stx TryPieceRot
                 jsr DoesPieceFit
-                ldx PieceFitsFlag
-                beq chkForceDown
+                ldx FlagPieceFits
+                beq endKeyPressed
                 ldx TryPieceRot
                 stx PieceRot
-                jmp chkForceDown
+                rts
 testLeftKey     cmp #$88 ; arrow left
                 bne testRightKey
                 dec TryPieceX
                 jsr DoesPieceFit
-                ldx PieceFitsFlag
-                beq chkForceDown
+                ldx FlagPieceFits
+                beq endKeyPressed
                 dec PieceX
-                jmp chkForceDown
+                rts
 testRightKey    cmp #$95 ; arrow right
                 bne testDownKey
                 inc TryPieceX
                 jsr DoesPieceFit
-                ldx PieceFitsFlag
-                beq chkForceDown
+                ldx FlagPieceFits
+                beq endKeyPressed
                 inc PieceX
-                jmp chkForceDown
+                rts
 testDownKey     cmp #$8a ; arrow bottom       ; TODO reset the forcedown
+                bne testSpaceKey
+                inc TryPieceY
+                jsr DoesPieceFit
+                ldx FlagPieceFits
+                beq endKeyPressed
+                inc PieceY
+                rts
+testSpaceKey    cmp #$a0 ; space
                 bne testEscKey
-                inc TryPieceY
-                jsr DoesPieceFit
-                ldx PieceFitsFlag
-                beq chkForceDown
-                inc PieceY
-                jmp chkForceDown
+                lda #1
+                sta FlagForceDown
+                sta FlagFalling
 testEscKey      cmp #$9b ; esc
-                beq endgame
-                jmp loopDraw0 ;loop back TODO relative instead of jmp?
-chkForceDown    lda chkForceDown
-                beq endLoopRound
-                inc TryPieceY
-                jsr DoesPieceFit
-                ldx PieceFitsFlag
-                beq endLoopRound
-                inc PieceY
-endLoopRound    jmp loopDraw0
-endgame         jsr HOME
+                bne endKeyPressed
+                ldx #1
+                stx FlagQuitGame
+endKeyPressed   rts
+endGame         nop
+exitGame        jsr HOME
                 rts
 ***
 ***
 ***
 NewGame         lda #0
                 sta PieceId
+                sta FlagQuitGame
+                rts
+NewPiece        lda #0
                 sta PieceY
                 sta PieceRot
+                sta FlagFalling
+                sta SpeedCount
+                lda #1
+                sta FlagRefreshScr
                 lda #5
                 sta PieceX
-                rts
-NewRound        lda #0
-                sta SleepCounterLo
-                sta FlagForceDown
-                lda #$b0
-                sta SleepCounterHi
+                lda #SpeedCountMax
+                sta Speed
+                lda PieceId
+                clc
+                adc #1
+                cmp #7
+                bne endNewPiece
+                lda #0
+endNewPiece     sta PieceId
                 rts
 ***
 *** Set PTR_Piece according to PieceId and PieceRot
@@ -254,7 +302,7 @@ dpLoop1         ldy DP_Y
 dploop0         lda (PTR_Piece),y
                 cmp #'.'
                 beq dpNextCh
-                lda #$23
+                lda #$7f       ; TODO constant
                 sta (PTR_ScreenPos),y
 dpNextCh        iny
                 cpy #4  ; 4 cols
@@ -353,14 +401,13 @@ DLStrLen        dfb 0 ; use the stack instead?
 ***
 ***
 ***
-PieceFitsFlag   dfb 0
 DoesPieceFit    lda #1
-                sta PieceFitsFlag               ; piece fit by default
+                sta FlagPieceFits               ; piece fit by default
                 ldx TryPieceX
                 ldy TryPieceY
                 jsr SetFieldPos2
                 lda TryPieceRot ; set ptr piece expects rotation in register a
-                jsr SetPtrPiece
+                jsr SetPtrPiece ;
                 ldx #4
 dpfLoop1        ldy #0
 dpfLoop0        lda (PTR_Piece),y
@@ -371,7 +418,7 @@ dpfLoop0        lda (PTR_Piece),y
                 cmp #" "
                 beq dpfNextCh
                 lda #0
-                sta PieceFitsFlag
+                sta FlagPieceFits
                 jmp dpfEnd
 dpfNextCh       iny
                 cpy #4
@@ -395,47 +442,110 @@ dpfNextCh       iny
                 dex
                 bne dpfLoop1
 dpfEnd          rts
-*DoesPieceFit    PSHU    A,B,X,Y,CC              ; save registers
-*                LDX     #Piece2
-*                _SRF    #FPieceFits             ; piece fit by default
-*                LDB     PieceY,X
-*                LDA     #FieldWidth             ; cols per line
-*                MUL
-*                ADDB    PieceX,X                ; add X
-*                ADDD    #Field
-*                PSHU    D
-*                ADDD    #(3*FieldWidth)+4       ; where we stop to check
-*                STD     dpfFieldEndAddr
-*                LDA     PieceId,X
-*                LDB     #PieceStructLen
-*                MUL
-*                ADDD    #Pieces
-*                TFR     D,Y                     ; X now points to the beginning of the piece struct to check
-*                LDA     #PieceLen
-*                LDB     PieceRot,X
-*                MUL
-*                LEAX    D,Y                     ; x now should point to the good rotated shape to draw
-*                PULU    Y                       ; Y == field pos where we start to check
-*dpfLoopRow0     LDB     #4                      ; 4 "pixels' per row
-*dpfLoopRow1     LDA     ,X+
-*                CMPA    #ChDot
-*                BNE     dpfCheck                ; not a dot, we must check
-*                LEAY    1,Y                     ; won't check but still need to move to next pos on the field
-*                JMP     dpfEndCheck
-*dpfCheck        LDA     ,Y+                     ; the char to draw, from the stack
-*                CMPA    #ChSpc
-*                BEQ     dpfEndCheck
-*                _CRF    #FPieceFits             ; piece does not fit
-*                JMP     dpfEnd
-*dpfEndCheck     DECB
-*                BNE     dpfLoopRow1
-*                CMPY    dpfFieldEndAddr         ; are we done checking?
-*                BGE     dpfEnd
-*                LEAY    (FieldWidth-4),Y        ; move at the beginning of next line on video ram (32-width=28)
-*                JMP     dpfLoopRow0
-*dpfEnd          PULU    A,B,X,Y,CC              ; restore the registers
+***
+***
+***
+LockPiece       ldx PieceX
+                ldy PieceY
+                jsr SetFieldPos2
+                lda PieceRot ; set ptr piece expects rotation in register a
+                jsr SetPtrPiece ;
+                ldx #4
+lpLoop1         ldy #0
+lpLoop0         lda (PTR_Piece),y
+                cmp #'.'
+                beq lpNextCh
+                * pixel is on, lock it on field
+                lda #$7f       ; TODO constant
+                sta (PTR_Field),y
+lpNextCh        iny
+                cpy #4
+                bne lpLoop0
+                * increment ptr_piece by 4
+                lda PTR_Piece
+                clc
+                adc #4
+                sta PTR_Piece
+                lda PTR_Piece+1
+                adc #0
+                sta PTR_Piece+1
+                * increment FieldPos by FIELD_COLS
+                lda PTR_Field
+                clc
+                adc #FIELD_COLS
+                sta PTR_Field
+                lda PTR_Field+1
+                adc #0
+                sta PTR_Field+1
+                dex
+                bne lpLoop1
+                rts
+***
+*** CheckForLines: goes through the field and check if there are any full lines
+*** this routine also updates the score by at least 25pts (we are called because a piece is locked)
+*** and by (1 << nblines) * 100
+***
+CheckForLines   lda #0
+                sta FlagHasLines
+                rts
+*CheckForLines   PSHU    A,B,X,Y,CC
+*                _CRF    #FHasLines              ; clear the has lines flag
+*                CLR     linesCount              ; clear the lines count
+*                LDX     #Field                  ; X points to the top of the field
+*cflCheckRow     LDB     #FieldWidth-2           ; will check the row backward, ignoring the left and right border
+*cflLoop0        LDA     B,X                     ; load in a the field charact
+*                CMPA    #ChSpc                  ; is it a space?
+*                BEQ     cflNextRow              ; yeah, so not a line, look next row
+*                DECB                            ; no, keep looking previous char on row
+*                BNE     cflLoop0                ; loop if we haven't reach left side
+*                _SRF    #FHasLines              ; no space found on the row, we have a line
+*                INC     linesCount              ; increment the number of lines found
+*                LDB     #FieldWidth-2           ; mark the line in the field for display
+*                LDA     #ChLine                 ; by using the line char
+*cflLoop1        STA     B,X
+*                DECB
+*                BNE     cflLoop1
+*cflNextRow      LEAX    FieldWidth,X            ; go on to next row
+*                CMPX    #FieldBottom            ; check if we reach the bottom of the field
+*                BLT     cflCheckRow             ; no, loop
+*                LDA     linesCount              ; increment the score, lines count has to be in A
+*                LBSR     IncScore               ; call sub routine to compute new score
+*                PULU    A,B,X,Y,CC
 *                RTS
-*dpfFieldEndAddr FDB     0
+*linesCount      FCB     0
+***
+*** RemoveLines
+***
+RemoveLines     nop
+                rts
+*RemoveLines     PSHU    A,B,X,Y,CC              ; save registers
+*                LDX     #FieldBottom-FieldWidth ; start from the bottom
+*rlLoop0         LDA     1,X                     ; is first char a line indicator?
+*                CMPA    #ChLine
+*                BNE     rl2                     ; no, skip
+*                BSR     moveRows                ; yes! move rows down
+*                JMP     rlLoop0                 ; check at current pos again
+*rl2             LEAX    -FieldWidth,X           ; go up one row
+*                CMPX    #Field                  ; are we at top?
+*                BGE     rlLoop0                 ; no, keep checking for lines
+*endRemoveLines  PULU    A,B,X,Y,CC              ; restore registers
+*                RTS
+; move rows down
+*moveRows        PSHU    X
+*mlLoop0         CMPX    #Field                  ; are we at the top?
+*                BEQ     endMoveRows             ; yes, we're done
+*                LEAY    -FieldWidth,X           ; go one up
+*                LDB     #FieldWidth-2           ; only move inside the borders
+*mlLoop1         LDA     B,Y                     ; copy row above into current row
+*                STA     B,X
+*                DECB
+*                BNE     mlLoop1
+*                TFR     Y,X                     ; row above is now current row
+*                JMP     mlLoop0
+*endMoveRows     PULU    X
+*                RTS
+
+
 ***
 *** CopyPieces: Copy "Piece*"" variables into "TryPiece*" variables
 ***
@@ -448,6 +558,15 @@ CopyPieces      pha
                 lda PieceRot
                 sta TryPieceRot
                 pla
+                rts
+*======================================================================================================================
+* Sleep:        Loops by doing nothing for a little while
+*----------------------------------------------------------------------------------------------------------------------
+Sleep           phx
+                ldx #SleepTime
+sleepLoop       dex
+                bne sleepLoop
+                plx
                 rts
 ***
 ***
@@ -478,6 +597,7 @@ splashLoop0     lda KYBD
 FIELD_COLS      equ 14
 FIELD_ROWS      equ 17
 *Field           ds  160,$a0
+* total field size is 14*17=238 so we can use an 8bit index
 Field           asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
                 asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
                 asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
@@ -542,8 +662,6 @@ Splash09        dfb $58,$04,16
 Splash10        dfb $d8,$06,22
                 asc "Press Any Key To Start"
 *
-*GridBottom      dfb $d1,$05,12
-*                asc '::::::::::::'
 Title           dfb $93,$05,16
                 asc "S P E T R // S !"
 HighScoreL      dfb $90,$06,22
@@ -593,6 +711,16 @@ PieceRot        dfb 0
 TryPieceX       dfb 0
 TryPieceY       dfb 0
 TryPieceRot     dfb 0
-SleepCounterLo  dfb 0
-SleepCounterHi  dfb 0
+SpeedCount      dfb 0
+Speed           dfb 0
+FlagPieceFits   dfb 0
 FlagForceDown   dfb 0
+FlagHasLines    dfb 0
+FlagRefreshScr  dfb 0
+FlagFalling     dfb 0
+FlagQuitGame    dfb 0
+*======================================================================================================================
+* Game constants
+*----------------------------------------------------------------------------------------------------------------------
+SpeedCountMax   equ $ff
+SleepTime       equ $ff
