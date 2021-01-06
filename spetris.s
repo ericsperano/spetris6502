@@ -63,15 +63,27 @@ roundSleep      ldx FlagFalling                 ; is it falling?
                 stx FlagForceDown               ; yes, will force down and refresh screen
                 stx FlagRefreshScr
 roundSleep1     jsr Sleep
-                inc SpeedCount                  ; increment the speed count
-                lda SpeedCount
-                cmp Speed                       ; and force down if it reached speed max
-                bne pollKeyboard                ; if not go straight to poll keyboard
-                ldx #1
+                clc
+                *inc SpeedCount                  ; increment the speed count
+                lda SpeedCountLo
+                adc #1
+                sta SpeedCountLo
+                lda SpeedCountHi
+                adc #0
+                sta SpeedCountHi
+                * 16 bits comparisons of Speed and SpeedCount
+                lda SpeedCountHi
+                cmp SpeedHi
+                bcc pollKeyboard                ;X < Y
+                lda SpeedCountLo
+                cmp SpeedLo
+                bcc pollKeyboard
+                ldx #1                          ; we reached speed max
                 stx FlagForceDown               ; yes, will force down and refresh screen
                 stx FlagRefreshScr
                 dex
-                stx SpeedCount                  ; reset the speed counter
+                stx SpeedCountLo                ; reset the speed counter
+                stx SpeedCountHi
 pollKeyboard    lda KYBD                        ; polls keyboard
                 cmp #$80
                 bcc chkForceDown                ; no key pressed
@@ -93,14 +105,14 @@ moveDown        jsr CopyPieces
 roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr CheckForLines               ; check if it has complete lines
                 ldx FlagHasLines
-                beq startRound                  ; no, go get next piece
+                beq endRound                    ; no, go get next piece
                 jsr DrawField                   ; yep, draw and sleep for animation
-                ldx #SleepTime
+;                ldx #SleepTime
 loopSleep       jsr Sleep
-                dex
-                bne loopSleep
+;                dex
+;                bne loopSleep
                 jsr RemoveLines                 ; animation displayed, remove the lines from the field
-                jmp startRound
+endRound        jmp startRound
 ***
 ***
 ***
@@ -118,6 +130,7 @@ storeRot        stx TryPieceRot
                 beq endKeyPressed
                 ldx TryPieceRot
                 stx PieceRot
+                stx FlagRefreshScr
                 rts
 testLeftKey     cmp #$88 ; arrow left
                 bne testRightKey
@@ -126,6 +139,7 @@ testLeftKey     cmp #$88 ; arrow left
                 ldx FlagPieceFits
                 beq endKeyPressed
                 dec PieceX
+                stx FlagRefreshScr
                 rts
 testRightKey    cmp #$95 ; arrow right
                 bne testDownKey
@@ -134,6 +148,7 @@ testRightKey    cmp #$95 ; arrow right
                 ldx FlagPieceFits
                 beq endKeyPressed
                 inc PieceX
+                stx FlagRefreshScr
                 rts
 testDownKey     cmp #$8a ; arrow bottom       ; TODO reset the forcedown
                 bne testSpaceKey
@@ -142,6 +157,7 @@ testDownKey     cmp #$8a ; arrow bottom       ; TODO reset the forcedown
                 ldx FlagPieceFits
                 beq endKeyPressed
                 inc PieceY
+                stx FlagRefreshScr
                 rts
 testSpaceKey    cmp #$a0 ; space
                 bne testEscKey
@@ -162,18 +178,21 @@ exitGame        jsr HOME
 NewGame         lda #0
                 sta PieceId
                 sta FlagQuitGame
+                sta SpeedCountLo
+                sta SpeedCountHi
+                lda #$ff
+                sta SpeedLo
+                lda #5
+                sta SpeedHi
+                lda #1
+                sta FlagRefreshScr
                 rts
 NewPiece        lda #0
                 sta PieceY
                 sta PieceRot
                 sta FlagFalling
-                sta SpeedCount
-                lda #1
-                sta FlagRefreshScr
                 lda #5
                 sta PieceX
-                lda #SpeedCountMax
-                sta Speed
                 lda PieceId
                 clc
                 adc #1
@@ -711,8 +730,10 @@ PieceRot        dfb 0
 TryPieceX       dfb 0
 TryPieceY       dfb 0
 TryPieceRot     dfb 0
-SpeedCount      dfb 0
-Speed           dfb 0
+SpeedCountLo    dfb 0
+SpeedCountHi    dfb 0
+SpeedLo         dfb 0
+SpeedHi         dfb 0
 FlagPieceFits   dfb 0
 FlagForceDown   dfb 0
 FlagHasLines    dfb 0
@@ -722,5 +743,4 @@ FlagQuitGame    dfb 0
 *======================================================================================================================
 * Game constants
 *----------------------------------------------------------------------------------------------------------------------
-SpeedCountMax   equ $ff
 SleepTime       equ $ff
