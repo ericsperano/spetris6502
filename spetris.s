@@ -5,9 +5,9 @@ STROBE          equ $c010
 HOME            equ $fc58
 ALTCHARSETOFF   equ $c00e
 ALTCHARSETON    equ $c00f
-PTR1            equ $06
-PTR2            equ $08
-PTR3            equ $1d
+PTR_FieldTmp1   equ $06
+PTR_FieldTmp2   equ $08
+PTR1            equ $1d
 PTR_Piece       equ $ce
 PTR_Field       equ $eb
 PTR_FieldPos    equ $ed
@@ -104,7 +104,7 @@ moveDown        jsr CopyPieces
                 jmp roundLoop
 roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr CheckForLines               ; check if it has complete lines
-                ldx FlagHasLines
+                ldx LinesCount
                 beq endRound                    ; no, go get next piece
                 jsr DrawField                   ; yep, draw and sleep for animation
 ;                ldx #SleepTime
@@ -112,6 +112,9 @@ loopSleep       jsr Sleep
 ;                dex
 ;                bne loopSleep
                 jsr RemoveLines                 ; animation displayed, remove the lines from the field
+                ldx #1
+                stx FlagRefreshScr
+
 endRound        jmp startRound
 ***
 ***
@@ -505,65 +508,89 @@ lpNextCh        iny
 *** and by (1 << nblines) * 100
 ***
 CheckForLines   lda #0
-                sta FlagHasLines
-                rts
-*CheckForLines   PSHU    A,B,X,Y,CC
-*                _CRF    #FHasLines              ; clear the has lines flag
-*                CLR     linesCount              ; clear the lines count
-*                LDX     #Field                  ; X points to the top of the field
-*cflCheckRow     LDB     #FieldWidth-2           ; will check the row backward, ignoring the left and right border
-*cflLoop0        LDA     B,X                     ; load in a the field charact
-*                CMPA    #ChSpc                  ; is it a space?
-*                BEQ     cflNextRow              ; yeah, so not a line, look next row
-*                DECB                            ; no, keep looking previous char on row
-*                BNE     cflLoop0                ; loop if we haven't reach left side
-*                _SRF    #FHasLines              ; no space found on the row, we have a line
-*                INC     linesCount              ; increment the number of lines found
-*                LDB     #FieldWidth-2           ; mark the line in the field for display
-*                LDA     #ChLine                 ; by using the line char
-*cflLoop1        STA     B,X
-*                DECB
-*                BNE     cflLoop1
-*cflNextRow      LEAX    FieldWidth,X            ; go on to next row
-*                CMPX    #FieldBottom            ; check if we reach the bottom of the field
-*                BLT     cflCheckRow             ; no, loop
-*                LDA     linesCount              ; increment the score, lines count has to be in A
-*                LBSR     IncScore               ; call sub routine to compute new score
-*                PULU    A,B,X,Y,CC
-*                RTS
-*linesCount      FCB     0
+                sta LinesCount                  ; clear the lines count
+                InitPtrField
+                ldx #16
+cflCheckRow     ldy #2                          ; start at pos 2 in the row
+cflLoop0        lda (PTR_Field),y
+                cmp #" "                        ; is it a space? TODO constant
+                beq cflNextRow                  ; yeah so not a line, look next row
+                iny                             ; no, keep looking previous char on row
+                cpy #12                         ; loop if we haven't reach the right side
+                bcc cflLoop0
+                inc LinesCount
+                ldy #2                           ; mark the line in the field for display
+                lda #CH_LINES                    ; by using the line char
+cflLoop1        sta (PTR_Field),y
+                iny
+                cpy #12                          ; loop if we haven't reach the right side
+                bcc cflLoop1
+cflNextRow      dex
+                beq cflEnd
+                lda PTR_Field
+                clc
+                adc #FIELD_COLS
+                sta PTR_Field
+                lda PTR_Field+1
+                adc #0
+                sta PTR_Field+1
+                jmp cflCheckRow
+cflEnd          rts
 ***
 *** RemoveLines
 ***
-RemoveLines     nop
+RemoveLines     lda #<FieldBottom               ; start from the bottom
+                sta PTR_Field                   ; save lo byte
+                lda #>FieldBottom
+                sta PTR_Field+1                 ; save hi byte
+rlLoop0         ldy #2                          ; start at pos 2 in the row
+                lda (PTR_Field),y
+                cmp #CH_LINES                   ; is third char a line indicator?
+                bne rlUp                        ; no, skip
+                * move rows
+                lda PTR_Field+1                 ; copy current pointer to tmp1
+                sta PTR_FieldTmp1+1
+                lda PTR_Field
+                sta PTR_FieldTmp1
+rlLoop1         sec                             ; set pointer tmp2 above current line
+                sbc #FIELD_COLS
+                sta PTR_FieldTmp2
+                lda PTR_FieldTmp1+1
+                sbc #0
+                sta PTR_FieldTmp2+1
+                cmp #>Field                     ; check if previous line is lower memory adr than beginning of field
+                bcc rlEnd                       ; hi byte is lower yes, end
+                bne rlCopy                      ; hi byte is not equal
+                lda PTR_FieldTmp2               ; check lo byte
+                cmp #<Field
+                beq rlEnd                       ; yes, end
+                ldy #2
+rlCopy          lda (PTR_FieldTmp2),y           ; copy previous line
+                sta (PTR_FieldTmp1),y
+                iny
+                cpy #12
+                bne rlCopy
+                lda PTR_FieldTmp2+1
+                sta PTR_FieldTmp1+1
+                lda PTR_FieldTmp2
+                sta PTR_FieldTmp1
+                jmp rlLoop1
+rlUp            sec                             ; go up one row
+                lda PTR_Field
+                sbc #FIELD_COLS
+                sta PTR_Field
+                lda PTR_Field+1
+                sbc #0
+                sta PTR_Field+1
+                * check if we are at top
+rlEnd           lda PTR_Field+1
+                cmp #>Field
+                bne rlLoop0                     ; no, check previous line
+                lda PTR_Field
+                cmp #<Field
+                bne rlLoop0                     ; no, check previous line
                 rts
-*RemoveLines     PSHU    A,B,X,Y,CC              ; save registers
-*                LDX     #FieldBottom-FieldWidth ; start from the bottom
-*rlLoop0         LDA     1,X                     ; is first char a line indicator?
-*                CMPA    #ChLine
-*                BNE     rl2                     ; no, skip
-*                BSR     moveRows                ; yes! move rows down
-*                JMP     rlLoop0                 ; check at current pos again
-*rl2             LEAX    -FieldWidth,X           ; go up one row
-*                CMPX    #Field                  ; are we at top?
-*                BGE     rlLoop0                 ; no, keep checking for lines
-*endRemoveLines  PULU    A,B,X,Y,CC              ; restore registers
-*                RTS
-; move rows down
-*moveRows        PSHU    X
-*mlLoop0         CMPX    #Field                  ; are we at the top?
-*                BEQ     endMoveRows             ; yes, we're done
-*                LEAY    -FieldWidth,X           ; go one up
-*                LDB     #FieldWidth-2           ; only move inside the borders
-*mlLoop1         LDA     B,Y                     ; copy row above into current row
-*                STA     B,X
-*                DECB
-*                BNE     mlLoop1
-*                TFR     Y,X                     ; row above is now current row
-*                JMP     mlLoop0
-*endMoveRows     PULU    X
-*                RTS
-
+*TODO clear top line!
 
 ***
 *** CopyPieces: Copy "Piece*"" variables into "TryPiece*" variables
@@ -617,22 +644,22 @@ FIELD_COLS      equ 14
 FIELD_ROWS      equ 17
 *Field           ds  160,$a0
 * total field size is 14*17=238 so we can use an 8bit index
-Field           asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
-                asc $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+Field           dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+                dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
+FieldBottom     dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
                 dfb $a0,$a0,$4c,$4c,$4c,$4c,$4c,$4c,$4c,$4c,$4c,$4c,$a0,$a0
 FieldPositions  dfb $80,$05
                 dfb $00,$06
@@ -734,9 +761,9 @@ SpeedCountLo    dfb 0
 SpeedCountHi    dfb 0
 SpeedLo         dfb 0
 SpeedHi         dfb 0
+LinesCount      dfb 0
 FlagPieceFits   dfb 0
 FlagForceDown   dfb 0
-FlagHasLines    dfb 0
 FlagRefreshScr  dfb 0
 FlagFalling     dfb 0
 FlagQuitGame    dfb 0
@@ -744,3 +771,4 @@ FlagQuitGame    dfb 0
 * Game constants
 *----------------------------------------------------------------------------------------------------------------------
 SleepTime       equ $ff
+CH_LINES        equ "="
