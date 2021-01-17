@@ -107,10 +107,10 @@ roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 ldx LinesCount
                 beq endRound                    ; no, go get next piece
                 jsr DrawField                   ; yep, draw and sleep for animation
-;                ldx #SleepTime
+                ldx #SleepTime
 loopSleep       jsr Sleep
-;                dex
-;                bne loopSleep
+                dex
+                bne loopSleep
                 jsr RemoveLines                 ; animation displayed, remove the lines from the field
                 ldx #1
                 stx FlagRefreshScr
@@ -548,15 +548,15 @@ rlLoop0         ldy #2                          ; start at pos 2 in the row
                 cmp #CH_LINES                   ; is third char a line indicator?
                 bne rlUp                        ; no, skip
                 * move rows
-                lda PTR_Field+1                 ; copy current pointer to tmp1
+                lda PTR_Field+1                 ; copy current pointer hi byte to tmp1
                 sta PTR_FieldTmp1+1
-                lda PTR_Field
+                lda PTR_Field                   ; copy current pointer lo byte to tmp1
                 sta PTR_FieldTmp1
 rlLoop1         sec                             ; set pointer tmp2 above current line
-                sbc #FIELD_COLS
+                sbc #FIELD_COLS                 ; substract length of row from lo byte
                 sta PTR_FieldTmp2
                 lda PTR_FieldTmp1+1
-                sbc #0
+                sbc #0                          ; substract carry from hi byte
                 sta PTR_FieldTmp2+1
                 cmp #>Field                     ; check if previous line is lower memory adr than beginning of field
                 bcc rlEnd                       ; hi byte is lower yes, end
@@ -564,12 +564,12 @@ rlLoop1         sec                             ; set pointer tmp2 above current
                 lda PTR_FieldTmp2               ; check lo byte
                 cmp #<Field
                 beq rlEnd                       ; yes, end
-                ldy #2
-rlCopy          lda (PTR_FieldTmp2),y           ; copy previous line
+rlCopy          ldy #2
+rlCopyLoop      lda (PTR_FieldTmp2),y           ; copy previous line
                 sta (PTR_FieldTmp1),y
                 iny
                 cpy #12
-                bne rlCopy
+                bne rlCopyLoop
                 lda PTR_FieldTmp2+1
                 sta PTR_FieldTmp1+1
                 lda PTR_FieldTmp2
