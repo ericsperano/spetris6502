@@ -39,11 +39,27 @@ InitPtrPiece    MAC
                 lda #>Pieces
                 sta PTR_Piece+1
                 <<<
+IncSeed         MAC
+                clc
+                lda Seed1
+                adc #1
+                sta Seed1
+                lda Seed2
+                adc #0
+                sta Seed2
+                lda Seed3
+                adc #0
+                sta Seed3
+                lda Seed4
+                adc #0
+                sta Seed4
+                <<<
                 ***
                 ************************* BEGIN PROGRAM *************************
                 ***
                 jsr SplashScreen
                 jsr HOME
+                jsr INITRAND
                 jsr DrawScreen
 startGame       jsr NewGame                     ; initialize new game and screen
 startRound      jsr NewPiece                    ; initialize this round (a round is what handle one piece in the game)
@@ -197,13 +213,19 @@ NewPiece        lda #0
                 sta FlagFalling
                 lda #5
                 sta PieceX
-                lda PieceId
-                clc
-                adc #1
+npRand          jsr RANDOM
+                lda Rand1
+                and #%00000111
                 cmp #7
-                bne endNewPiece
-                lda #0
-endNewPiece     sta PieceId
+                beq npRand
+                sta PieceId
+                *lda PieceId
+                *clc
+                *adc #1
+                *cmp #7
+                *bne endNewPiece
+                *lda #0
+*endNewPiece     sta PieceId
                 rts
 ***
 *** Set PTR_Piece according to PieceId and PieceRot
@@ -632,12 +654,48 @@ SplashScreen    jsr HOME
                 JSRDisplayLine Splash09
                 JSRDisplayLine Splash10
                 * get key
-splashLoop0     lda KYBD
+splashLoop0     IncSeed
+                lda KYBD
                 cmp #$80
                 bcc splashLoop0
                 *
                 sta STROBE
                 rts
+***
+***
+***
+RANDOM          ror Rand4       ; Bit 25 to carry
+                lda Rand3       ; Shift left 8 bits
+                sta Rand4
+                lda Rand2
+                sta Rand3
+                lda Rand1
+                sta Rand2
+                lda Rand4       ; Get original bits 17-24
+                ror             ; Now bits 18-25 in ACC
+                rol Rand1       ; R1 holds bits 1-7
+                eor Rand1       ; Seven bits at once
+                ror Rand4       ; Shift right by one bit
+                ror Rand3
+                ror Rand2
+                ror
+                sta Rand1
+                rts
+* this work with integar basic
+INITRAND        lda Seed1       ; Seed the random number generator
+                sta Rand1       ; based on delay between keypresses
+                lda Seed2
+                sta Rand2
+                lda Seed3
+                sta Rand3
+                lda Seed4
+                sta Rand4
+                ldx #$20         ; Generate a few random numbers
+INITLOOP        jsr RANDOM       ; to kick things off
+                dex
+                bne INITLOOP
+                rts
+
 ***
 ***
 ***
@@ -768,6 +826,14 @@ FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0
 FlagFalling     dfb 0
 FlagQuitGame    dfb 0
+Seed1           dfb 0
+Seed2           dfb 0
+Seed3           dfb 0
+Seed4           dfb 0
+Rand1           dfb 0
+Rand2           dfb 0
+Rand3           dfb 0
+Rand4           dfb 0
 *======================================================================================================================
 * Game constants
 *----------------------------------------------------------------------------------------------------------------------
