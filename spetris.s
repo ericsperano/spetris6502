@@ -50,9 +50,10 @@ startRound      jsr NewPiece                    ; initialize this round (a round
                 jsr CopyPieces
                 jsr DoesPieceFit                ; first check if it would fit
                 ldx FlagPieceFits
-                bne roundLoop                   ; it does, go on with the loop for this round
+                bne roundLoop2                   ; it does, go on with the loop for this round
                 jmp endGame                     ; it does not, game over!
-roundLoop       ldx FlagRefreshScr
+roundLoop       jsr CopyPieces
+roundLoop2      ldx FlagRefreshScr
                 beq roundSleep
                 jsr DrawField
                 jsr DrawPiece
