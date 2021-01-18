@@ -826,7 +826,7 @@ FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0
 FlagFalling     dfb 0
 FlagQuitGame    dfb 0
-Seed1           dfb 0
+Seed1           dfb 0   ; to do not sure we need a separate seed
 Seed2           dfb 0
 Seed3           dfb 0
 Seed4           dfb 0
