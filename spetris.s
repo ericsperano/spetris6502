@@ -33,12 +33,12 @@ InitPtrFieldPos MAC
                 lda #>FieldPositions
                 sta PTR_FieldPos+1
                 <<<
-InitPtrPiece    MAC
-                lda #<Pieces
-                sta PTR_Piece
-                lda #>Pieces
-                sta PTR_Piece+1
-                <<<
+*InitPtrPiece    MAC
+*                lda #<Pieces
+*                sta PTR_Piece
+*                lda #>Pieces
+*                sta PTR_Piece+1
+*                <<<
 IncSeed         MAC
                 clc
                 lda Seed1
@@ -64,7 +64,7 @@ IncSeed         MAC
 startGame       jsr NewGame                     ; initialize new game and screen
                 jsr NewPiece                    ; to get 2 new piece at the start
 startRound      jsr NewPiece                    ; initialize this round (a round is what handle one piece in the game)
-                *jsr DrawNextPiece
+                jsr DrawNextPiece
                 jsr CopyPieces
                 jsr DoesPieceFit                ; first check if it would fit
                 ldx FlagPieceFits
@@ -152,6 +152,7 @@ storeRot        stx TryPieceRot
                 beq endKeyPressed
                 ldx TryPieceRot
                 stx PieceRot
+                ldx #1
                 stx FlagRefreshScr
                 rts
 testLeftKey     cmp #$88 ; arrow left
@@ -234,7 +235,8 @@ SetPtrPiece     pha                             ; save rotation on stack
                 sta PTR_Piece
                 lda #>Pieces                    ; hi byte of struct to display
                 sta PTR_Piece+1
-                ldx PieceId
+                *ldx PieceId
+                cpx #0
                 beq SPP_testRot
 SPP_loop0       clc
                 lda PTR_Piece
@@ -368,16 +370,36 @@ DrawNextPiece   lda #0 ; default rotation
                 ldx NextPieceId
                 jsr SetPtrPiece
                 ldx #4 ; 4 rows
-                lda #$90
-                sta PTR_ScreenPos
-                lda #$05
-                sta PTR_ScreenPos+1
+                stx DP_Rows
+                ldy #9 ; first line is 9
+                sty DP_Y
+dnpLoop1        ldy DP_Y
+                ldx #$10
+                jsr SetScreenPos2
                 ldy #0
-dnpLoop1        lda (PTR_Piece),y
-                sta (PTR_ScreenPos),y
-                iny
-                cpy #4
-                bne dnpLoop1
+dnploop0        lda (PTR_Piece),y
+                cmp #'.'
+                bne dnpSetBrick
+                lda #" " ; TODO constant
+                jmp dnpDraw
+dnpSetBrick     lda #$7f       ; TODO constant
+dnpDraw         sta (PTR_ScreenPos),y
+dnpNextCh       iny
+                cpy #4  ; 4 cols
+                bne dnploop0
+                inc DP_Y
+                dec DP_Rows     ; go to end of routine if no more rows
+                beq dnpend
+                lda PTR_Piece   ; we add 4 to PTR_Piece to point to next row from the base adress to use y at 0
+                clc
+                adc #4
+                sta PTR_Piece
+                lda PTR_Piece+1
+                adc #0          ; add carry 0 to hi byte
+                sta PTR_Piece+1
+                jmp dnpLoop1
+dnpend          rts
+
 
 *                stx DP_Rows
 *                ldy PieceY      ; use a copy of PieceY (DP_Y) to not increment the real variable
@@ -405,7 +427,6 @@ dnpLoop1        lda (PTR_Piece),y
 *                adc #0          ; add carry 0 to hi byte
 *                sta PTR_Piece+1
 *                jmp dpLoop1
-dnpend          rts
 *
 DP_Y            dfb 0
 DP_Rows         dfb 0
@@ -822,7 +843,6 @@ TotalPiecesL    dfb $90,$07,22
 NextPieceL      dfb $b8,$04,11
                 asc "Next Piece:"
 *
-PiecesMono      asc 'ABCDEFG'
 PieceLen        equ 16
 PieceStructLen  equ 4*PieceLen              ; 4 different rotations
 Pieces          asc '..X...X...X...X.'   ; rotation 0 piece 0
