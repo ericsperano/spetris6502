@@ -62,7 +62,9 @@ IncSeed         MAC
                 jsr INITRAND
                 jsr DrawScreen
 startGame       jsr NewGame                     ; initialize new game and screen
+                jsr NewPiece                    ; to get 2 new piece at the start
 startRound      jsr NewPiece                    ; initialize this round (a round is what handle one piece in the game)
+                *jsr DrawNextPiece
                 jsr CopyPieces
                 jsr DoesPieceFit                ; first check if it would fit
                 ldx FlagPieceFits
@@ -196,7 +198,6 @@ exitGame        jsr HOME
 ***
 ***
 NewGame         lda #0
-                sta PieceId
                 sta FlagQuitGame
                 sta SpeedCountLo
                 sta SpeedCountHi
@@ -213,23 +214,19 @@ NewPiece        lda #0
                 sta FlagFalling
                 lda #5
                 sta PieceX
+                lda NextPieceId
+                sta PieceId
 npRand          jsr RANDOM
                 lda Rand1
                 and #%00000111
                 cmp #7
                 beq npRand
-                sta PieceId
-                *lda PieceId
-                *clc
-                *adc #1
-                *cmp #7
-                *bne endNewPiece
-                *lda #0
-*endNewPiece     sta PieceId
+                sta NextPieceId
                 rts
 ***
-*** Set PTR_Piece according to PieceId and PieceRot
+*** Set PTR_Piece
 **  A=rotation
+**  X=pieceID
 **  Trashes A,X
 ***
 SetPtrPiece     pha                             ; save rotation on stack
@@ -330,11 +327,11 @@ SFP_End         lda PTR_Field
                 sta PTR_Field+1
                 ply
                 rts
-
 ***
 *** Draw Piece
 ***
 DrawPiece       lda PieceRot
+                ldx PieceId
                 jsr SetPtrPiece
                 ldx #4 ; 4 rows
                 stx DP_Rows
@@ -364,6 +361,51 @@ dpNextCh        iny
                 sta PTR_Piece+1
                 jmp dpLoop1
 dpend           rts
+***
+*** Draw Next Piece
+***
+DrawNextPiece   lda #0 ; default rotation
+                ldx NextPieceId
+                jsr SetPtrPiece
+                ldx #4 ; 4 rows
+                lda #$90
+                sta PTR_ScreenPos
+                lda #$05
+                sta PTR_ScreenPos+1
+                ldy #0
+dnpLoop1        lda (PTR_Piece),y
+                sta (PTR_ScreenPos),y
+                iny
+                cpy #4
+                bne dnpLoop1
+
+*                stx DP_Rows
+*                ldy PieceY      ; use a copy of PieceY (DP_Y) to not increment the real variable
+*                sty DP_Y
+*dpLoop1         ldy DP_Y
+*                ldx PieceX
+*                jsr SetScreenPos2
+*                ldy #0
+*dploop0         lda (PTR_Piece),y
+*                cmp #'.'
+*                beq dpNextCh
+*                lda #$7f       ; TODO constant
+*                sta (PTR_ScreenPos),y
+*dpNextCh        iny
+*                cpy #4  ; 4 cols
+*                bne dploop0
+*                inc DP_Y
+*                dec DP_Rows     ; go to end of routine if no more rows
+*                beq dpend
+*                lda PTR_Piece   ; we add 4 to PTR_Piece to point to next row from the base adress to use y at 0
+*                clc
+*                adc #4
+*                sta PTR_Piece
+*                lda PTR_Piece+1
+*                adc #0          ; add carry 0 to hi byte
+*                sta PTR_Piece+1
+*                jmp dpLoop1
+dnpend          rts
 *
 DP_Y            dfb 0
 DP_Rows         dfb 0
@@ -452,6 +494,7 @@ DoesPieceFit    lda #1
                 ldy TryPieceY
                 jsr SetFieldPos2
                 lda TryPieceRot ; set ptr piece expects rotation in register a
+                ldx PieceId
                 jsr SetPtrPiece ;
                 ldx #4
 dpfLoop1        ldy #0
@@ -494,6 +537,7 @@ LockPiece       ldx PieceX
                 ldy PieceY
                 jsr SetFieldPos2
                 lda PieceRot ; set ptr piece expects rotation in register a
+                ldx PieceId
                 jsr SetPtrPiece ;
                 ldx #4
 lpLoop1         ldy #0
@@ -810,6 +854,7 @@ Pieces          asc '..X...X...X...X.'   ; rotation 0 piece 0
                 asc '.....XX..X...X..'   ; rotation 2
                 asc '....XXX...X.....'   ; rotation 3
 PieceId         dfb 0 ; these all get initialized in NewGame
+NextPieceId     dfb 0
 PieceX          dfb 0
 PieceY          dfb 0
 PieceRot        dfb 0
