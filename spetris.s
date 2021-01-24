@@ -7,7 +7,7 @@ ALTCHARSETOFF   equ $c00e
 ALTCHARSETON    equ $c00f
 PTR_FieldTmp1   equ $06
 PTR_FieldTmp2   equ $08
-PTR1            equ $1d
+PTR_Points      equ $1d
 PTR_Piece       equ $ce
 PTR_Field       equ $eb
 PTR_FieldPos    equ $ed
@@ -41,26 +41,30 @@ InitPtrFieldPos MAC
 *                <<<
 IncSeed         MAC
                 clc
-                lda Seed1
+                lda Rand1
                 adc #1
-                sta Seed1
-                lda Seed2
+                sta Rand1
+                lda Rand2
                 adc #0
-                sta Seed2
-                lda Seed3
+                sta Rand2
+                lda Rand3
                 adc #0
-                sta Seed3
-                lda Seed4
+                sta Rand3
+                lda Rand4
                 adc #0
-                sta Seed4
+                sta Rand4
                 <<<
                 ***
                 ************************* BEGIN PROGRAM *************************
                 ***
                 jsr SplashScreen
                 jsr HOME
-                jsr INITRAND
+                jsr InitRandom
                 jsr DrawScreen
+                lda #<PointsTable
+                sta PTR_Points
+                lda #>PointsTable
+                sta PTR_Points+1
 startGame       jsr NewGame                     ; initialize new game and screen
                 jsr NewPiece                    ; to get 2 new piece at the start
 startRound      jsr NewPiece                    ; initialize this round (a round is what handle one piece in the game)
@@ -123,6 +127,8 @@ moveDown        jsr CopyPieces
                 jmp roundLoop
 roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr CheckForLines               ; check if it has complete lines
+                jsr DisplayScore
+                jsr DisplayHiScore
                 ldx LinesCount
                 beq endRound                    ; no, go get next piece
                 jsr DrawField                   ; yep, draw and sleep for animation
@@ -371,7 +377,7 @@ DrawNextPiece   lda #0 ; default rotation
                 jsr SetPtrPiece
                 ldx #4 ; 4 rows
                 stx DP_Rows
-                ldy #9 ; first line is 9
+                ldy #10 ; first line is 9
                 sty DP_Y
 dnpLoop1        ldy DP_Y
                 ldx #$10
@@ -399,7 +405,62 @@ dnpNextCh       iny
                 sta PTR_Piece+1
                 jmp dnpLoop1
 dnpend          rts
-
+***
+***
+***
+DisplayScore    ldy #3
+                ldx #29
+                jsr SetScreenPos2
+                ldx #0
+                ldy #0
+dsLoop0         lda Score,x
+                pha
+                lsr
+                lsr
+                lsr
+                lsr
+                and #$0f
+                clc
+                adc #$b0
+                sta (PTR_ScreenPos),y
+                iny
+                pla
+                and #$0f
+                adc #$b0
+                sta (PTR_ScreenPos),y
+                iny
+                inx
+                cpx #5
+                bne dsLoop0
+                rts
+***
+***
+***
+DisplayHiScore  ldy #2
+                ldx #29
+                jsr SetScreenPos2
+                ldx #0
+                ldy #0
+dhsLoop0        lda HighScore,x
+                pha
+                lsr
+                lsr
+                lsr
+                lsr
+                and #$0f
+                clc
+                adc #$b0
+                sta (PTR_ScreenPos),y
+                iny
+                pla
+                and #$0f
+                adc #$b0
+                sta (PTR_ScreenPos),y
+                iny
+                inx
+                cpx #5
+                bne dhsLoop0
+                rts
 
 *                stx DP_Rows
 *                ldy PieceY      ; use a copy of PieceY (DP_Y) to not increment the real variable
@@ -439,8 +500,11 @@ DrawScreen      InitPtrFieldPos
                 JSRDisplayLine Title
                 JSRDisplayLine HighScoreL
                 JSRDisplayLine ScoreL
+                JSRDisplayLine LevelL
                 JSRDisplayLine TotalPiecesL
                 JSRDisplayLine NextPieceL
+                jsr DisplayScore
+                jsr DisplayHiScore
                 rts
 ***
 *** Draw Field
@@ -746,16 +810,15 @@ RANDOM          ror Rand4       ; Bit 25 to carry
                 ror
                 sta Rand1
                 rts
-* this work with integar basic
-INITRAND        lda Seed1       ; Seed the random number generator
-                sta Rand1       ; based on delay between keypresses
-                lda Seed2
-                sta Rand2
-                lda Seed3
-                sta Rand3
-                lda Seed4
-                sta Rand4
-                ldx #$20         ; Generate a few random numbers
+*INITRAND        lda Seed1       ; Seed the random number generator
+*                sta Rand1       ; based on delay between keypresses
+*                lda Seed2
+*                sta Rand2
+*                lda Seed3
+*                sta Rand3
+*                lda Seed4
+*                sta Rand4
+InitRandom      ldx #$20         ; Generate a few random numbers
 INITLOOP        jsr RANDOM       ; to kick things off
                 dex
                 bne INITLOOP
@@ -838,9 +901,11 @@ HighScoreL      dfb $90,$06,22
                 asc "High Score:           "
 ScoreL          dfb $10,$07,22
                 asc "Score:                "
-TotalPiecesL    dfb $90,$07,22
+LevelL          dfb $90,$07,22
+                asc "Level:                "
+TotalPiecesL    dfb $38,$04,22
                 asc "Total Pieces:         "
-NextPieceL      dfb $b8,$04,11
+NextPieceL      dfb $38,$05,11
                 asc "Next Piece:"
 *
 PieceLen        equ 16
@@ -891,14 +956,18 @@ FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0
 FlagFalling     dfb 0
 FlagQuitGame    dfb 0
-Seed1           dfb 0   ; to do not sure we need a separate seed
-Seed2           dfb 0
-Seed3           dfb 0
-Seed4           dfb 0
+;Seed1           dfb 0   ; to do not sure we need a separate seed
+;Seed2           dfb 0
+;Seed3           dfb 0
+;Seed4           dfb 0
 Rand1           dfb 0
 Rand2           dfb 0
 Rand3           dfb 0
 Rand4           dfb 0
+HighScore       dfb $00,$00,$00,$00,$00 ; bcd encoded
+Score           dfb $01,$23,$45,$67,$89 ; bcd encoded
+PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd
+
 *======================================================================================================================
 * Game constants
 *----------------------------------------------------------------------------------------------------------------------
