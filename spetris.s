@@ -194,12 +194,26 @@ testSpaceKey    cmp #$a0 ; space
                 sta FlagForceDown
                 sta FlagFalling
 testEscKey      cmp #$9b ; esc
-                bne endKeyPressed
+                bne testPKey
                 ldx #1
                 stx FlagQuitGame
+                rts
+testPKey        cmp #"p"
+                bne endKeyPressed
+                jsr PauseGame
 endKeyPressed   rts
 endGame         nop
 exitGame        jsr HOME
+                rts
+***
+***
+***
+PauseGame       JSRDisplayLine PausedL
+pauseLoop       lda KYBD                        ; polls keyboard
+                cmp #$80
+                bcc pauseLoop                   ; no key pressed
+                sta STROBE
+                JSRDisplayLine PausedBlankL
                 rts
 ***
 ***
@@ -907,6 +921,11 @@ TotalPiecesL    dfb $38,$04,22
                 asc "Total Pieces:         "
 NextPieceL      dfb $38,$05,11
                 asc "Next Piece:"
+PausedL         dfb $de,$06,11
+                asc "P A U S E D"
+PausedBlankL    dfb $de,$06,11
+                asc "           "
+
 *
 PieceLen        equ 16
 PieceStructLen  equ 4*PieceLen              ; 4 different rotations
