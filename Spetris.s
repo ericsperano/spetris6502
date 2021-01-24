@@ -1,32 +1,34 @@
 ***
-*** SPETRIS FOR APPLE II COMPUTERS
+*** SPETRIS FOR THE APPLE II COMPUTER
 ***
                 org $2000
                 use macro/DisplayLine.Macs
-                use macro/IncSeed.Macs
-                use macro/InitPtrField.Macs
-                use macro/InitPtrFieldPos.Macs
-***
-*** BEGIN PROGRAM
-***
-                jsr SplashScreen
-                jsr HOME
-                jsr InitRandom
-                jsr DrawScreen
+                use macro/InitPtr.Macs
+                * begin program
+                jsr SplashScreen                ; display screen and wait for a key press
+                jsr HOME                        ; clear screen
+                sta ALTCHARSETON                ; enable alternate char set
                 * init zero page pointers
-                lda #<PointsTable
-                sta PTR_Points
-                lda #>PointsTable
-                sta PTR_Points+1
+                InitPtr PointsTable;PTR_Points
+                InitPtr Field;PTR_Field
+                * draw screen
+                JSRDisplayLine Title            ; display all the right side lables
+                JSRDisplayLine HighScoreL
+                JSRDisplayLine ScoreL
+                JSRDisplayLine LevelL
+                JSRDisplayLine TotalPiecesL
+                JSRDisplayLine NextPieceL
+                jsr DisplayScore
+                jsr DisplayHiScore
+                jsr InitRandom                  ; generate some random numbers
                 * start a new game
-startGame       jsr NewGame                     ; initialize new game and screen
-                jsr NewPiece                    ; to get 2 new piece at the start
-startRound      jsr NewPiece                    ; initialize this round (a round is what handle one piece in the game)
-                jsr DrawNextPiece
+startGame       jsr NewGame                     ; initialize new game
+                jsr NewPiece                    ; get 2 new piece at the start (current and next)
+startRound      jsr NewPiece                    ; initialize this round
+                jsr DrawNextPiece               ; draw the new next piece
                 jsr CopyPieces
                 jsr DoesPieceFit                ; first check if it would fit
-                ldx FlagPieceFits
-                bne roundLoop2                   ; it does, go on with the loop for this round
+                bcs roundLoop2                  ; it does, go on with the loop for this round
                 jmp endGame                     ; it does not, game over!
 roundLoop       jsr CopyPieces
 roundLoop2      ldx FlagRefreshScr
@@ -74,8 +76,9 @@ chkForceDown    ldx FlagForceDown               ; is it time for piece to go dow
 moveDown        jsr CopyPieces
                 inc TryPieceY                   ; check if it can go further down
                 jsr DoesPieceFit
-                ldx FlagPieceFits
-                beq roundLockPiece              ; it doesnt, we lock
+                bcc roundLockPiece              ; it doesnt, we lock
+                *ldx FlagPieceFits
+                *beq roundLockPiece              ; it doesnt, we lock
                 inc PieceY
                 dec FlagForceDown               ; clear the flag
                 jmp roundLoop
@@ -100,8 +103,8 @@ endRound        jmp startRound
 ***
 ***
 KeyPressed      sta STROBE
-                cmp #$8b ; arrow up
-                bne testLeftKey
+                cmp #KeyUpArrow                 ; is it the up arrow key?
+                bne testLeftKey                 ; no, keep searching
                 ldx PieceRot
                 bne decRot
                 ldx #3
@@ -109,68 +112,68 @@ KeyPressed      sta STROBE
 decRot          dex
 storeRot        stx TryPieceRot
                 jsr DoesPieceFit
-                ldx FlagPieceFits
-                beq endKeyPressed
-                ldx TryPieceRot
+                bcc endUpKey                    ; does not fit, return
+                ldx TryPieceRot                 ; it fits, copy the new rotation value
                 stx PieceRot
-                ldx #1
+                ldx #1                          ; and refresh screen
                 stx FlagRefreshScr
-                rts
-testLeftKey     cmp #$88 ; arrow left
-                bne testRightKey
-                dec TryPieceX
+endUpKey        rts
+testLeftKey     cmp #KeyLeftArrow               ; is it the left arrow key?
+                bne testRightKey                ; no, keep searching
+                dec TryPieceX                   ; yes, try with x - 1
                 jsr DoesPieceFit
-                ldx FlagPieceFits
-                beq endKeyPressed
-                *bcc endKeyPressed
-                dec PieceX
+                bcc endLeftKey                  ; does not fit, return
+                dec PieceX                      ; it fits, decrease x
+                ldx #1                          ; and refresh screen
                 stx FlagRefreshScr
-                rts
-testRightKey    cmp #$95 ; arrow right
-                bne testDownKey
-                inc TryPieceX
+endLeftKey      rts
+testRightKey    cmp #KeyRightArrow              ; is it the right arrow key?
+                bne testDownKey                 ; no, keep searching
+                inc TryPieceX                   ; yes, try with x + 1
                 jsr DoesPieceFit
-                ldx FlagPieceFits
-                beq endKeyPressed
-                inc PieceX
+                bcc endRightKey                 ; does not fit, return
+                inc PieceX                      ; it fits, increase x
+                ldx #1                          ; and refresh screen
                 stx FlagRefreshScr
-                rts
-testDownKey     cmp #$8a ; arrow bottom       ; TODO reset the forcedown
-                bne testSpaceKey
-                inc TryPieceY
+endRightKey     rts
+testDownKey     cmp #KeyDownArrow               ; is it the down arrow key?
+                 ; TODO reset the forcedown
+                bne testSpaceKey                ; no, keep searching
+                inc TryPieceY                   ; yes, try with y + 1
                 jsr DoesPieceFit
-                ldx FlagPieceFits
-                beq endKeyPressed
-                inc PieceY
+                bcc endDownKey                  ; does not fit, return
+                inc PieceY                      ; it fits, increase y
+                ldx #1                          ; and refresh screen
                 stx FlagRefreshScr
-                rts
-testSpaceKey    cmp #$a0 ; space
-                bne testEscKey
-                lda #1
-                sta FlagForceDown
-                sta FlagFalling
-testEscKey      cmp #$9b ; esc
-                bne testPKey
-                ldx #1
+endDownKey      rts
+testSpaceKey    cmp #KeySpace                   ; is it the space bar?
+                bne testEscKey                  ; no keep searching
+                ldx #1                          ;
+                stx FlagForceDown
+                stx FlagFalling
+testEscKey      cmp #KeyEscape                  ; is it the escape key?
+                bne testPKey                    ; no, keep searching
+                ldx #1                          ; yes, quit the game
                 stx FlagQuitGame
-                rts
-testPKey        cmp #"p"
-                bne endKeyPressed
-                jsr PauseGame
-endKeyPressed   rts
+endEscKey       rts
+testPKey        cmp #KeyP                       ; is it the P key?
+                bne endPKey                     ; no, return
+                JSRDisplayLine PausedL          ; yes, display pause message
+pauseLoop       lda KYBD                        ; poll keyboard
+                cmp #$80                        ; key pressed?
+                bcc pauseLoop                   ; no, keep polling
+                sta STROBE                      ; key pressed
+                JSRDisplayLine PausedBlankL     ; erase pause msg and return
+endPKey         rts
+***
+***
 endGame         nop
 exitGame        jsr HOME
                 rts
 ***
 ***
 ***
-PauseGame       JSRDisplayLine PausedL
-pauseLoop       lda KYBD                        ; polls keyboard
-                cmp #$80
-                bcc pauseLoop                   ; no key pressed
-                sta STROBE
-                JSRDisplayLine PausedBlankL
-                rts
+
 ***
 ***
 ***
@@ -198,7 +201,7 @@ NewPiece        lda #0
                 sta PieceX
                 lda NextPieceId
                 sta PieceId
-npRand          jsr RANDOM
+npRand          jsr RandomNumber
                 lda Rand1
                 and #%00000111
                 cmp #7
@@ -251,7 +254,7 @@ SetScreenPos    phy
                 asl ; multiply by 2 because each array elem is 2 bytes (an address)
                 tay
                 stx SSP_X
-                InitPtrFieldPos
+                InitPtr FieldPositions;PTR_FieldPos
                 clc
                 lda (PTR_FieldPos),y
                 adc SSP_X
@@ -271,7 +274,7 @@ SetScreenPos2   phy
                 asl ; multiply by 2 because each array elem is 2 bytes (an address)
                 tay
                 stx SSP_X
-                InitPtrFieldPos
+                InitPtr FieldPositions;PTR_FieldPos
                 clc
                 lda (PTR_FieldPos),y
                 adc SSP_X
@@ -288,7 +291,7 @@ SSP_X           dfb 0 ; to rename X tmp
 
 SetFieldPos2    phy
                 stx SSP_X
-                InitPtrField
+                InitPtr Field;PTR_Field
                 cpy #0
                 beq SFP_End
 SFP_loop0       lda PTR_Field
@@ -474,25 +477,10 @@ IncScore        lda LinesCount
 DP_Y            dfb 0
 DP_Rows         dfb 0
 ***
-*** Draw Screen
-***
-DrawScreen      InitPtrFieldPos
-                sta ALTCHARSETON
-                *JSRDisplayLine GridBottom
-                JSRDisplayLine Title
-                JSRDisplayLine HighScoreL
-                JSRDisplayLine ScoreL
-                JSRDisplayLine LevelL
-                JSRDisplayLine TotalPiecesL
-                JSRDisplayLine NextPieceL
-                jsr DisplayScore
-                jsr DisplayHiScore
-                rts
-***
 *** Draw Field
 ***
-DrawField       InitPtrField
-                InitPtrFieldPos
+DrawField       InitPtr Field;PTR_Field
+                InitPtr FieldPositions;PTR_FieldPos
                 ldy #0
                 ldx #0 ; row counter
                 sty DF_FieldPosY
@@ -558,9 +546,7 @@ DLStrLen        dfb 0 ; use the stack instead?
 ***  Returns:
 ***    Carry flag on/off: Piece fits/doesn't fit
 ***
-DoesPieceFit    lda #1
-                sta FlagPieceFits               ; piece fit by default
-                ldx TryPieceX
+DoesPieceFit    ldx TryPieceX
                 ldy TryPieceY
                 jsr SetFieldPos2
                 lda TryPieceRot ; set ptr piece expects rotation in register a
@@ -575,8 +561,8 @@ dpfLoop0        lda (PTR_Piece),y
                 lda (PTR_Field),y
                 cmp #" "
                 beq dpfNextCh
-                lda #0
-                sta FlagPieceFits
+                *lda #0
+                *sta FlagPieceFits
                 clc                             ; clear carry and return, does not fit
                 rts
 dpfNextCh       iny
@@ -648,7 +634,7 @@ lpNextCh        iny
 ***
 CheckForLines   lda #0
                 sta LinesCount                  ; clear the lines count
-                InitPtrField
+                InitPtr Field;PTR_Field
                 ldx #16
 cflCheckRow     ldy #2                          ; start at pos 2 in the row
 cflLoop0        lda (PTR_Field),y
@@ -744,73 +730,12 @@ CopyPieces      pha
                 sta TryPieceRot
                 pla
                 rts
-*======================================================================================================================
-* Sleep:        Loops by doing nothing for a little while
-*----------------------------------------------------------------------------------------------------------------------
-Sleep           phx
-                ldx #SleepTime
-sleepLoop       dex
-                bne sleepLoop
-                plx
-                rts
 ***
 ***
 ***
-SplashScreen    jsr HOME
-                sta ALTCHARSETON
-                JSRDisplayLine Splash00
-                JSRDisplayLine Splash01
-                JSRDisplayLine Splash02
-                JSRDisplayLine Splash03
-                JSRDisplayLine Splash04
-                JSRDisplayLine Splash05
-                JSRDisplayLine Splash06
-                JSRDisplayLine Splash07
-                JSRDisplayLine Splash08
-                JSRDisplayLine Splash09
-                JSRDisplayLine Splash10
-                * get key
-splashLoop0     IncSeed
-                lda KYBD
-                cmp #$80
-                bcc splashLoop0
-                *
-                sta STROBE
-                rts
-***
-***
-***
-RANDOM          ror Rand4       ; Bit 25 to carry
-                lda Rand3       ; Shift left 8 bits
-                sta Rand4
-                lda Rand2
-                sta Rand3
-                lda Rand1
-                sta Rand2
-                lda Rand4       ; Get original bits 17-24
-                ror             ; Now bits 18-25 in ACC
-                rol Rand1       ; R1 holds bits 1-7
-                eor Rand1       ; Seven bits at once
-                ror Rand4       ; Shift right by one bit
-                ror Rand3
-                ror Rand2
-                ror
-                sta Rand1
-                rts
-*INITRAND        lda Seed1       ; Seed the random number generator
-*                sta Rand1       ; based on delay between keypresses
-*                lda Seed2
-*                sta Rand2
-*                lda Seed3
-*                sta Rand3
-*                lda Seed4
-*                sta Rand4
-InitRandom      ldx #$20         ; Generate a few random numbers
-INITLOOP        jsr RANDOM       ; to kick things off
-                dex
-                bne INITLOOP
-                rts
-
+                put Spetris.Random
+                put Spetris.Sleep
+                put Spetris.Splash
 ***
 ***
 ***
@@ -853,34 +778,6 @@ FieldPositions  dfb $80,$05
                 dfb $50,$05
                 dfb $d0,$05
 *
-Splash00        dfb $8b,$04,16
-                asc "S P E T R // S !"
-Splash01        dfb $87,$05,24
-                asc "For "
-                dfb $40
-                asc " Apple // Computers"
-Splash02        dfb $30,$04,22
-                asc "Keyboard Game Controls"
-Splash03        dfb $30,$05,19
-                dfb $4b
-                asc "      Rotate Piece"
-Splash04        dfb $b0,$05,22
-                dfb $48
-                asc "      Move Piece Left"
-Splash05        dfb $30,$06,23
-                dfb $55
-                asc "      Move Piece Right"
-Splash06        dfb $b0,$06,22
-                dfb $4a
-                asc "      Move Piece Down"
-Splash07        dfb $30,$07,17
-                asc "Space  Drop Piece"
-Splash08        dfb $b0,$07,17
-                asc "P      Pause Game"
-Splash09        dfb $58,$04,16
-                asc "Esc    Quit Game"
-Splash10        dfb $d8,$06,22
-                asc "Press Any Key To Start"
 *
 Title           dfb $93,$05,16
                 asc "S P E T R // S !"
@@ -943,15 +840,10 @@ SpeedCountHi    dfb 0
 SpeedLo         dfb 0
 SpeedHi         dfb 0
 LinesCount      dfb 0
-FlagPieceFits   dfb 0
 FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0
 FlagFalling     dfb 0
 FlagQuitGame    dfb 0
-Rand1           dfb 0
-Rand2           dfb 0
-Rand3           dfb 0
-Rand4           dfb 0
 HighScore       dfb $00,$00,$00,$00,$00 ; bcd encoded
 Score           dfb $00,$00,$00,$00,$00 ; bcd encoded
 PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd
@@ -972,6 +864,13 @@ PTR_DisplayLine equ $fc
 SleepTime       equ $ff
 ChTransparent   equ '.'
 ChLines         equ "="
+KeyLeftArrow    equ $88
+KeyRightArrow   equ $95
+KeyUpArrow      equ $8b
+KeyDownArrow    equ $8a
+KeySpace        equ $a0
+KeyEscape       equ $9b
+KeyP            equ "p"
 ***
 *** Apple II Subroutines
 ***

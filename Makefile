@@ -9,7 +9,7 @@ OBJ := spetris
 all: $(DSK)
 
 spetris:
-	$(ASM) $(ASM_FLAGS) macro spetris.s
+	$(ASM) $(ASM_FLAGS) macro Spetris.s
 
 $(DSK): clean $(OBJ)
 	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -pro140 $(DSK) SPETRIS
