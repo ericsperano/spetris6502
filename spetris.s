@@ -127,6 +127,7 @@ moveDown        jsr CopyPieces
                 jmp roundLoop
 roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr CheckForLines               ; check if it has complete lines
+                jsr IncScore
                 jsr DisplayScore
                 jsr DisplayHiScore
                 ldx LinesCount
@@ -222,6 +223,11 @@ NewGame         lda #0
                 sta FlagQuitGame
                 sta SpeedCountLo
                 sta SpeedCountHi
+                sta Score
+                sta Score+1
+                sta Score+2
+                sta Score+3
+                sta Score+4
                 lda #$ff
                 sta SpeedLo
                 lda #5
@@ -281,7 +287,6 @@ SPP_loop1       clc
                 dex
                 bne SPP_loop1
 SPP_End         rts
-
 ***
 *** Set PTR_ScreenPos with register x,y
 ***
@@ -475,34 +480,42 @@ dhsLoop0        lda HighScore,x
                 cpx #5
                 bne dhsLoop0
                 rts
+***
+***
+***
+IncScore        lda LinesCount
+                asl ; multiply by 2
+                tay
+                iny ; lo byte is in +1
+                ldx #4
+                clc
+                sed
+                lda Score,x
+                adc (PTR_Points),y
+                sta Score,x
+                dex
+                dey
+                lda Score,x
+                adc (PTR_Points),y
+                sta Score,x
+                dex
+                lda Score,x
+                adc #0
+                sta Score,x
+                dex
+                lda Score,x
+                adc #0
+                sta Score,x
+                dex
+                lda Score,x
+                adc #0
+                sta Score,x
+                cld ; binary mode
+                rts
+***
+***
+***
 
-*                stx DP_Rows
-*                ldy PieceY      ; use a copy of PieceY (DP_Y) to not increment the real variable
-*                sty DP_Y
-*dpLoop1         ldy DP_Y
-*                ldx PieceX
-*                jsr SetScreenPos2
-*                ldy #0
-*dploop0         lda (PTR_Piece),y
-*                cmp #'.'
-*                beq dpNextCh
-*                lda #$7f       ; TODO constant
-*                sta (PTR_ScreenPos),y
-*dpNextCh        iny
-*                cpy #4  ; 4 cols
-*                bne dploop0
-*                inc DP_Y
-*                dec DP_Rows     ; go to end of routine if no more rows
-*                beq dpend
-*                lda PTR_Piece   ; we add 4 to PTR_Piece to point to next row from the base adress to use y at 0
-*                clc
-*                adc #4
-*                sta PTR_Piece
-*                lda PTR_Piece+1
-*                adc #0          ; add carry 0 to hi byte
-*                sta PTR_Piece+1
-*                jmp dpLoop1
-*
 DP_Y            dfb 0
 DP_Rows         dfb 0
 ***
@@ -984,7 +997,7 @@ Rand2           dfb 0
 Rand3           dfb 0
 Rand4           dfb 0
 HighScore       dfb $00,$00,$00,$00,$00 ; bcd encoded
-Score           dfb $01,$23,$45,$67,$89 ; bcd encoded
+Score           dfb $00,$00,$00,$00,$00 ; bcd encoded
 PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd
 
 *======================================================================================================================
