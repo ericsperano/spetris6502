@@ -1,7 +1,7 @@
 SHELL=/bin/bash -o pipefail
 DSK:=spetris.po
 ASM := Merlin32
-ASM_FLAGS := -V .
+ASM_FLAGS := -V
 OBJ := spetris
 
 .PHONY: all
@@ -9,7 +9,7 @@ OBJ := spetris
 all: $(DSK)
 
 spetris:
-	$(ASM) $(ASM_FLAGS) spetris.s
+	$(ASM) $(ASM_FLAGS) macro spetris.s
 
 $(DSK): clean $(OBJ)
 	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -pro140 $(DSK) SPETRIS

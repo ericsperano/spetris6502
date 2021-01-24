@@ -1,70 +1,24 @@
-* SPETRIS FOR APPLE II COMPUTERS
+***
+*** SPETRIS FOR APPLE II COMPUTERS
+***
                 org $2000
-KYBD            equ $c000
-STROBE          equ $c010
-HOME            equ $fc58
-ALTCHARSETOFF   equ $c00e
-ALTCHARSETON    equ $c00f
-PTR_FieldTmp1   equ $06
-PTR_FieldTmp2   equ $08
-PTR_Points      equ $1d
-PTR_Piece       equ $ce
-PTR_Field       equ $eb
-PTR_FieldPos    equ $ed
-PTR_ScreenPos   equ $fa
-PTR_DisplayLine equ $fc
-*
-JSRDisplayLine  MAC
-                lda #<]1                    ; lo byte of struct to display
-                sta PTR_DisplayLine
-                lda #>]1                    ; hi byte of struct to display
-                sta PTR_DisplayLine+1
-                jsr DisplayLine
-                <<<
-InitPtrField    MAC
-                lda #<Field
-                sta PTR_Field
-                lda #>Field
-                sta PTR_Field+1
-                <<<
-InitPtrFieldPos MAC
-                lda #<FieldPositions
-                sta PTR_FieldPos
-                lda #>FieldPositions
-                sta PTR_FieldPos+1
-                <<<
-*InitPtrPiece    MAC
-*                lda #<Pieces
-*                sta PTR_Piece
-*                lda #>Pieces
-*                sta PTR_Piece+1
-*                <<<
-IncSeed         MAC
-                clc
-                lda Rand1
-                adc #1
-                sta Rand1
-                lda Rand2
-                adc #0
-                sta Rand2
-                lda Rand3
-                adc #0
-                sta Rand3
-                lda Rand4
-                adc #0
-                sta Rand4
-                <<<
-                ***
-                ************************* BEGIN PROGRAM *************************
-                ***
+                use macro/DisplayLine.Macs
+                use macro/IncSeed.Macs
+                use macro/InitPtrField.Macs
+                use macro/InitPtrFieldPos.Macs
+***
+*** BEGIN PROGRAM
+***
                 jsr SplashScreen
                 jsr HOME
                 jsr InitRandom
                 jsr DrawScreen
+                * init zero page pointers
                 lda #<PointsTable
                 sta PTR_Points
                 lda #>PointsTable
                 sta PTR_Points+1
+                * start a new game
 startGame       jsr NewGame                     ; initialize new game and screen
                 jsr NewPiece                    ; to get 2 new piece at the start
 startRound      jsr NewPiece                    ; initialize this round (a round is what handle one piece in the game)
@@ -168,6 +122,7 @@ testLeftKey     cmp #$88 ; arrow left
                 jsr DoesPieceFit
                 ldx FlagPieceFits
                 beq endKeyPressed
+                *bcc endKeyPressed
                 dec PieceX
                 stx FlagRefreshScr
                 rts
@@ -369,7 +324,7 @@ dpLoop1         ldy DP_Y
                 jsr SetScreenPos2
                 ldy #0
 dploop0         lda (PTR_Piece),y
-                cmp #'.'
+                cmp #ChTransparent
                 beq dpNextCh
                 lda #$7f       ; TODO constant
                 sta (PTR_ScreenPos),y
@@ -598,7 +553,10 @@ DisplayLineLoop lda (PTR_DisplayLine),y     ; get char to display
                 rts
 DLStrLen        dfb 0 ; use the stack instead?
 ***
+***  DoesPieceFit
 ***
+***  Returns:
+***    Carry flag on/off: Piece fits/doesn't fit
 ***
 DoesPieceFit    lda #1
                 sta FlagPieceFits               ; piece fit by default
@@ -619,7 +577,8 @@ dpfLoop0        lda (PTR_Piece),y
                 beq dpfNextCh
                 lda #0
                 sta FlagPieceFits
-                jmp dpfEnd
+                clc                             ; clear carry and return, does not fit
+                rts
 dpfNextCh       iny
                 cpy #4
                 bne dpfLoop0
@@ -641,7 +600,8 @@ dpfNextCh       iny
                 sta PTR_Field+1
                 dex
                 bne dpfLoop1
-dpfEnd          rts
+                sec                             ; set carry and return, piece fits
+                rts
 ***
 ***
 ***
@@ -699,7 +659,7 @@ cflLoop0        lda (PTR_Field),y
                 bcc cflLoop0
                 inc LinesCount
                 ldy #2                           ; mark the line in the field for display
-                lda #CH_LINES                    ; by using the line char
+                lda #ChLines                     ; by using the line char
 cflLoop1        sta (PTR_Field),y
                 iny
                 cpy #12                          ; loop if we haven't reach the right side
@@ -724,7 +684,7 @@ RemoveLines     lda #<FieldBottom               ; start from the bottom
                 sta PTR_Field+1                 ; save hi byte
 rlLoop0         ldy #2                          ; start at pos 2 in the row
                 lda (PTR_Field),y
-                cmp #CH_LINES                   ; is third char a line indicator?
+                cmp #ChLines                    ; is third char a line indicator?
                 bne rlUp                        ; no, skip
                 * move rows
                 lda PTR_Field+1                 ; copy current pointer hi byte to tmp1
@@ -988,10 +948,6 @@ FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0
 FlagFalling     dfb 0
 FlagQuitGame    dfb 0
-;Seed1           dfb 0   ; to do not sure we need a separate seed
-;Seed2           dfb 0
-;Seed3           dfb 0
-;Seed4           dfb 0
 Rand1           dfb 0
 Rand2           dfb 0
 Rand3           dfb 0
@@ -999,9 +955,28 @@ Rand4           dfb 0
 HighScore       dfb $00,$00,$00,$00,$00 ; bcd encoded
 Score           dfb $00,$00,$00,$00,$00 ; bcd encoded
 PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd
-
-*======================================================================================================================
-* Game constants
-*----------------------------------------------------------------------------------------------------------------------
+***
+*** zero page pointers
+***
+PTR_FieldTmp1   equ $06
+PTR_FieldTmp2   equ $08
+PTR_Points      equ $1d
+PTR_Piece       equ $ce
+PTR_Field       equ $eb
+PTR_FieldPos    equ $ed
+PTR_ScreenPos   equ $fa
+PTR_DisplayLine equ $fc
+***
+*** Game constants
+***
 SleepTime       equ $ff
-CH_LINES        equ "="
+ChTransparent   equ '.'
+ChLines         equ "="
+***
+*** Apple II Subroutines
+***
+KYBD            equ $c000
+STROBE          equ $c010
+HOME            equ $fc58
+ALTCHARSETON    equ $c00f
+*ALTCHARSETOFF   equ $c00e
