@@ -4,17 +4,17 @@
 ***
 SplashScreen    jsr HOME                        ; clear screen
                 sta ALTCHARSETON                ; enable alt charset
-                JSRDisplayLine Splash00
-                JSRDisplayLine Splash01
-                JSRDisplayLine Splash02
-                JSRDisplayLine Splash03
-                JSRDisplayLine Splash04
-                JSRDisplayLine Splash05
-                JSRDisplayLine Splash06
-                JSRDisplayLine Splash07
-                JSRDisplayLine Splash08
-                JSRDisplayLine Splash09
-                JSRDisplayLine Splash10
+                JSRDisplayStr Splash00
+                JSRDisplayStr Splash01
+                JSRDisplayStr Splash02
+                JSRDisplayStr Splash03
+                JSRDisplayStr Splash04
+                JSRDisplayStr Splash05
+                JSRDisplayStr Splash06
+                JSRDisplayStr Splash07
+                JSRDisplayStr Splash08
+                JSRDisplayStr Splash09
+                JSRDisplayStr Splash10
 splashLoop0     clc                             ; increment the 32bit seed
                 lda Rand1
                 adc #1

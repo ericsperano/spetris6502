@@ -2,8 +2,9 @@
 *** SPETRIS FOR THE APPLE II COMPUTER
 ***
                 org $2000
-                use macro/DisplayLine.Macs
                 use macro/InitPtr.Macs
+                use macro/JSRDisplayBCD.Macs
+                use macro/JSRDisplayStr.Macs
                 * begin program
                 jsr SplashScreen                ; display screen and wait for a key press
                 jsr HOME                        ; clear screen
@@ -12,25 +13,29 @@
                 InitPtr PointsTable;PTR_Points
                 InitPtr Field;PTR_Field
                 * draw screen
-                JSRDisplayLine Title            ; display all the right side lables
-                JSRDisplayLine HighScoreL
-                JSRDisplayLine ScoreL
-                JSRDisplayLine LevelL
-                JSRDisplayLine TotalPiecesL
-                JSRDisplayLine NextPieceL
-                jsr DisplayScore
-                jsr DisplayHiScore
+                JSRDisplayStr Title             ; display all the right side lables
+                JSRDisplayStr HighScoreL
+                JSRDisplayStr ScoreL
+                JSRDisplayStr LevelL
+                JSRDisplayStr TotalPiecesL
+                JSRDisplayStr NextPieceL
+                JSRDisplayBCD ScoreBCD
+                JSRDisplayBCD HighScoreBCD
+                JSRDisplayBCD LevelBCD
+                JSRDisplayBCD TotalPiecesBCD
+                ;jsr DisplayScore
+                ;jsr DisplayHiScore
                 jsr InitRandom                  ; generate some random numbers
                 * start a new game
 startGame       jsr NewGame                     ; initialize new game
                 jsr NewPiece                    ; get 2 new piece at the start (current and next)
 startRound      jsr NewPiece                    ; initialize this round
                 jsr DrawNextPiece               ; draw the new next piece
-                jsr CopyPieces
+                jsr InitTryPieces
                 jsr DoesPieceFit                ; first check if it would fit
                 bcs roundLoop2                  ; it does, go on with the loop for this round
                 jmp endGame                     ; it does not, game over!
-roundLoop       jsr CopyPieces
+roundLoop       jsr InitTryPieces
 roundLoop2      ldx FlagRefreshScr
                 beq roundSleep
                 jsr DrawField
@@ -73,20 +78,20 @@ pollKeyboard    lda KYBD                        ; polls keyboard
 chkForceDown    ldx FlagForceDown               ; is it time for piece to go down?
                 bne moveDown
                 jmp roundLoop                   ; no
-moveDown        jsr CopyPieces
+moveDown        jsr InitTryPieces
                 inc TryPieceY                   ; check if it can go further down
                 jsr DoesPieceFit
                 bcc roundLockPiece              ; it doesnt, we lock
-                *ldx FlagPieceFits
-                *beq roundLockPiece              ; it doesnt, we lock
                 inc PieceY
                 dec FlagForceDown               ; clear the flag
                 jmp roundLoop
 roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr CheckForLines               ; check if it has complete lines
                 jsr IncScore
-                jsr DisplayScore
-                jsr DisplayHiScore
+                ;jsr DisplayScore
+                JSRDisplayBCD ScoreBCD
+                ;;jsr DisplayHiScore
+                JSRDisplayBCD HighScoreBCD
                 ldx LinesCount
                 beq endRound                    ; no, go get next piece
                 jsr DrawField                   ; yep, draw and sleep for animation
@@ -97,7 +102,6 @@ loopSleep       jsr Sleep
                 jsr RemoveLines                 ; animation displayed, remove the lines from the field
                 ldx #1
                 stx FlagRefreshScr
-
 endRound        jmp startRound
 ***
 ***
@@ -158,22 +162,18 @@ testEscKey      cmp #KeyEscape                  ; is it the escape key?
 endEscKey       rts
 testPKey        cmp #KeyP                       ; is it the P key?
                 bne endPKey                     ; no, return
-                JSRDisplayLine PausedL          ; yes, display pause message
+                JSRDisplayStr PausedL           ; yes, display pause message
 pauseLoop       lda KYBD                        ; poll keyboard
                 cmp #$80                        ; key pressed?
                 bcc pauseLoop                   ; no, keep polling
                 sta STROBE                      ; key pressed
-                JSRDisplayLine PausedBlankL     ; erase pause msg and return
+                JSRDisplayStr PausedBlankL      ; erase pause msg and return
 endPKey         rts
 ***
 ***
 endGame         nop
 exitGame        jsr HOME
                 rts
-***
-***
-***
-
 ***
 ***
 ***
@@ -296,7 +296,7 @@ SetFieldPos2    phy
                 beq SFP_End
 SFP_loop0       lda PTR_Field
                 clc
-                adc #FIELD_COLS
+                adc #FieldCols
                 sta PTR_Field
                 lda PTR_Field+1
                 adc #0
@@ -385,67 +385,11 @@ dnpend          rts
 ***
 ***
 ***
-DisplayScore    ldy #3
-                ldx #29
-                jsr SetScreenPos2
-                ldx #0
-                ldy #0
-dsLoop0         lda Score,x
-                pha
-                lsr
-                lsr
-                lsr
-                lsr
-                and #$0f
-                clc
-                adc #$b0
-                sta (PTR_ScreenPos),y
-                iny
-                pla
-                and #$0f
-                adc #$b0
-                sta (PTR_ScreenPos),y
-                iny
-                inx
-                cpx #5
-                bne dsLoop0
-                rts
-***
-***
-***
-DisplayHiScore  ldy #2
-                ldx #29
-                jsr SetScreenPos2
-                ldx #0
-                ldy #0
-dhsLoop0        lda HighScore,x
-                pha
-                lsr
-                lsr
-                lsr
-                lsr
-                and #$0f
-                clc
-                adc #$b0
-                sta (PTR_ScreenPos),y
-                iny
-                pla
-                and #$0f
-                adc #$b0
-                sta (PTR_ScreenPos),y
-                iny
-                inx
-                cpx #5
-                bne dhsLoop0
-                rts
-***
-***
-***
 IncScore        lda LinesCount
                 asl ; multiply by 2
                 tay
                 iny ; lo byte is in +1
-                ldx #4
+                ldx #3  ; 4 bytes - 1
                 clc
                 sed
                 lda Score,x
@@ -455,10 +399,6 @@ IncScore        lda LinesCount
                 dey
                 lda Score,x
                 adc (PTR_Points),y
-                sta Score,x
-                dex
-                lda Score,x
-                adc #0
                 sta Score,x
                 dex
                 lda Score,x
@@ -497,14 +437,14 @@ DF_Loop1        ldy DF_FieldPosY
 DF_Loop0        lda (PTR_Field),y
                 sta (PTR_ScreenPos),y
                 iny
-                cpy #FIELD_COLS
+                cpy #FieldCols
                 bne DF_Loop0
                 inx
-                cpx #FIELD_ROWS
+                cpx #FieldRows
                 beq DF_End
                 clc                              ; clear carry flag
                 lda PTR_Field         ; add 3 to lo byte of struct pointer to point to text to print
-                adc #FIELD_COLS
+                adc #FieldCols
                 sta PTR_Field
                 lda PTR_Field+1
                 adc #0
@@ -513,33 +453,6 @@ DF_Loop0        lda (PTR_Field),y
 DF_End          rts
 *
 DF_FieldPosY    dfb 0
-***
-*** Display Line
-***
-DisplayLine     ldy #$00
-                lda (PTR_DisplayLine),y     ; lo byte of the screen adress
-                sta PTR_ScreenPos
-                iny
-                lda (PTR_DisplayLine),y     ; hi byte of the screen adress
-                sta PTR_ScreenPos+1
-                iny
-                lda (PTR_DisplayLine),y     ; string length
-                sta DLStrLen
-                clc                         ; clear carry flag
-                lda PTR_DisplayLine         ; add 3 to lo byte of struct pointer to point to text
-                adc #$3
-                sta PTR_DisplayLine         ; save new lo byte
-                lda PTR_DisplayLine+1
-                adc #$0                     ; will add 1 if the previous add set the carry flag
-                sta PTR_DisplayLine+1       ; save hi byte
-                ldy #$00
-DisplayLineLoop lda (PTR_DisplayLine),y     ; get char to display
-                sta (PTR_ScreenPos),y       ; copy to screen
-                iny
-                cpy DLStrLen
-                bne DisplayLineLoop
-                rts
-DLStrLen        dfb 0 ; use the stack instead?
 ***
 ***  DoesPieceFit
 ***
@@ -561,8 +474,6 @@ dpfLoop0        lda (PTR_Piece),y
                 lda (PTR_Field),y
                 cmp #" "
                 beq dpfNextCh
-                *lda #0
-                *sta FlagPieceFits
                 clc                             ; clear carry and return, does not fit
                 rts
 dpfNextCh       iny
@@ -576,10 +487,10 @@ dpfNextCh       iny
                 lda PTR_Piece+1
                 adc #0
                 sta PTR_Piece+1
-                * increment FieldPos by FIELD_COLS
+                * increment FieldPos by FieldCols
                 lda PTR_Field
                 clc
-                adc #FIELD_COLS
+                adc #FieldCols
                 sta PTR_Field
                 lda PTR_Field+1
                 adc #0
@@ -616,10 +527,10 @@ lpNextCh        iny
                 lda PTR_Piece+1
                 adc #0
                 sta PTR_Piece+1
-                * increment FieldPos by FIELD_COLS
+                * increment FieldPos by FieldCols
                 lda PTR_Field
                 clc
-                adc #FIELD_COLS
+                adc #FieldCols
                 sta PTR_Field
                 lda PTR_Field+1
                 adc #0
@@ -644,17 +555,17 @@ cflLoop0        lda (PTR_Field),y
                 cpy #12                         ; loop if we haven't reach the right side
                 bcc cflLoop0
                 inc LinesCount
-                ldy #2                           ; mark the line in the field for display
-                lda #ChLines                     ; by using the line char
+                ldy #2                          ; mark the line in the field for display
+                lda #ChLines                    ; by using the line char
 cflLoop1        sta (PTR_Field),y
                 iny
-                cpy #12                          ; loop if we haven't reach the right side
+                cpy #12                         ; loop if we haven't reach the right side
                 bcc cflLoop1
 cflNextRow      dex
                 beq cflEnd
                 lda PTR_Field
                 clc
-                adc #FIELD_COLS
+                adc #FieldCols
                 sta PTR_Field
                 lda PTR_Field+1
                 adc #0
@@ -678,7 +589,7 @@ rlLoop0         ldy #2                          ; start at pos 2 in the row
                 lda PTR_Field                   ; copy current pointer lo byte to tmp1
                 sta PTR_FieldTmp1
 rlLoop1         sec                             ; set pointer tmp2 above current line
-                sbc #FIELD_COLS                 ; substract length of row from lo byte
+                sbc #FieldCols                  ; substract length of row from lo byte
                 sta PTR_FieldTmp2
                 lda PTR_FieldTmp1+1
                 sbc #0                          ; substract carry from hi byte
@@ -702,7 +613,7 @@ rlCopyLoop      lda (PTR_FieldTmp2),y           ; copy previous line
                 jmp rlLoop1
 rlUp            sec                             ; go up one row
                 lda PTR_Field
-                sbc #FIELD_COLS
+                sbc #FieldCols
                 sta PTR_Field
                 lda PTR_Field+1
                 sbc #0
@@ -718,29 +629,30 @@ rlEnd           lda PTR_Field+1
 *TODO clear top line!
 
 ***
-*** CopyPieces: Copy "Piece*"" variables into "TryPiece*" variables
+*** InitTryPieces: Copy "Piece*"" variables into "TryPiece*" variables
 ***
-*----------------------------------------------------------------------------------------------------------------------
-CopyPieces      pha
-                lda PieceX
+InitTryPieces   pha                             ; save a
+                lda PieceX                      ; copy x
                 sta TryPieceX
-                lda PieceY
+                lda PieceY                      ; copy y
                 sta TryPieceY
-                lda PieceRot
+                lda PieceRot                    ; copy rotation
                 sta TryPieceRot
-                pla
+                pla                             ; restore a
                 rts
 ***
 ***
 ***
+                put Spetris.BCD
+                put Spetris.Str
                 put Spetris.Random
                 put Spetris.Sleep
                 put Spetris.Splash
 ***
 ***
 ***
-FIELD_COLS      equ 14
-FIELD_ROWS      equ 17
+FieldCols      equ 14
+FieldRows      equ 17
 *Field           ds  160,$a0
 * total field size is 14*17=238 so we can use an 8bit index
 Field           dfb $a0,$5a,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$5f,$a0
@@ -844,8 +756,14 @@ FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0
 FlagFalling     dfb 0
 FlagQuitGame    dfb 0
-HighScore       dfb $00,$00,$00,$00,$00 ; bcd encoded
-Score           dfb $00,$00,$00,$00,$00 ; bcd encoded
+HighScoreBCD    dfb $9d,$06,$04
+HighScore       dfb $00,$00,$00,$00 ; bcd encoded
+ScoreBCD        dfb $1d,$07,$04
+Score           dfb $00,$00,$00,$00 ; bcd encoded
+LevelBCD        dfb $a3,$07,$01
+Level           dfb $00
+TotalPiecesBCD  dfb $47,$04,$03
+TotalPieces     dfb $00,$00,$00
 PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd
 ***
 *** zero page pointers
@@ -857,7 +775,7 @@ PTR_Piece       equ $ce
 PTR_Field       equ $eb
 PTR_FieldPos    equ $ed
 PTR_ScreenPos   equ $fa
-PTR_DisplayLine equ $fc
+PtrDisplayStr   equ $fc         ; used by the DisplayStr routine
 ***
 *** Game constants
 ***
