@@ -9,25 +9,21 @@
                 jsr SplashScreen                ; display screen and wait for a key press
                 jsr HOME                        ; clear screen
                 sta ALTCHARSETON                ; enable alternate char set
-                * init zero page pointers
+                * init constant zero page pointers
                 InitPtr PointsTable;PTR_Points
                 InitPtr Field;PTR_Field
-                * draw screen
+                jsr InitRandom                  ; generate some random numbers ; TODO use or Macro?
+                jsr NewGame                     ; initialize new game           ; TODO use or Macro?
                 JSRDisplayStr Title             ; display all the right side lables
                 JSRDisplayStr HighScoreL
-                JSRDisplayStr ScoreL
-                JSRDisplayStr LevelL
-                JSRDisplayStr TotalPiecesL
-                JSRDisplayStr NextPieceL
-                JSRDisplayBCD ScoreBCD
                 JSRDisplayBCD HighScoreBCD
+                JSRDisplayStr ScoreL
+                JSRDisplayBCD ScoreBCD
+                JSRDisplayStr LevelL
                 JSRDisplayBCD LevelBCD
+                JSRDisplayStr TotalPiecesL
                 JSRDisplayBCD TotalPiecesBCD
-                ;jsr DisplayScore
-                ;jsr DisplayHiScore
-                jsr InitRandom                  ; generate some random numbers
-                * start a new game
-startGame       jsr NewGame                     ; initialize new game
+                JSRDisplayStr NextPieceL
                 jsr NewPiece                    ; get 2 new piece at the start (current and next)
 startRound      jsr NewPiece                    ; initialize this round
                 jsr DrawNextPiece               ; draw the new next piece
@@ -88,10 +84,10 @@ moveDown        jsr InitTryPieces
 roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr CheckForLines               ; check if it has complete lines
                 jsr IncScore
-                ;jsr DisplayScore
                 JSRDisplayBCD ScoreBCD
-                ;;jsr DisplayHiScore
                 JSRDisplayBCD HighScoreBCD
+                jsr IncTotalPieces
+                JSRDisplayBCD TotalPiecesBCD
                 ldx LinesCount
                 beq endRound                    ; no, go get next piece
                 jsr DrawField                   ; yep, draw and sleep for animation
@@ -185,14 +181,17 @@ NewGame         lda #0
                 sta Score+1
                 sta Score+2
                 sta Score+3
-                sta Score+4
                 lda #$ff
                 sta SpeedLo
                 lda #5
                 sta SpeedHi
                 lda #1
                 sta FlagRefreshScr
+                sta Level
                 rts
+***
+***
+***
 NewPiece        lda #0
                 sta PieceY
                 sta PieceRot
@@ -329,7 +328,7 @@ dpLoop1         ldy DP_Y
 dploop0         lda (PTR_Piece),y
                 cmp #ChTransparent
                 beq dpNextCh
-                lda #$7f       ; TODO constant
+                lda #ChTile
                 sta (PTR_ScreenPos),y
 dpNextCh        iny
                 cpy #4  ; 4 cols
@@ -413,7 +412,26 @@ IncScore        lda LinesCount
 ***
 ***
 ***
-
+IncTotalPieces  sed                             ; bcd mode
+                clc
+                ldx #2                          ; 3 bytes - 1
+                lda TotalPieces,x
+                adc #1
+                sta TotalPieces,x
+                dex
+                lda TotalPieces,x
+                adc #0
+                sta TotalPieces,x
+                dex
+                lda TotalPieces,x
+                adc #0
+                sta TotalPieces,x
+                dex
+                cld                             ; binary mode
+                rts
+***
+***
+***
 DP_Y            dfb 0
 DP_Rows         dfb 0
 ***
@@ -693,14 +711,14 @@ FieldPositions  dfb $80,$05
 *
 Title           dfb $93,$05,16
                 asc "S P E T R // S !"
-HighScoreL      dfb $90,$06,22
-                asc "High Score:           "
-ScoreL          dfb $10,$07,22
-                asc "Score:                "
-LevelL          dfb $90,$07,22
-                asc "Level:                "
-TotalPiecesL    dfb $38,$04,22
-                asc "Total Pieces:         "
+HighScoreL      dfb $90,$06,11
+                asc "High Score:"
+ScoreL          dfb $10,$07,6
+                asc "Score:"
+LevelL          dfb $90,$07,6
+                asc "Level:"
+TotalPiecesL    dfb $38,$04,13
+                asc "Total Pieces:"
 NextPieceL      dfb $38,$05,11
                 asc "Next Piece:"
 PausedL         dfb $de,$06,11
@@ -781,7 +799,9 @@ PtrDisplayStr   equ $fc         ; used by the DisplayStr routine
 ***
 SleepTime       equ $ff
 ChTransparent   equ '.'
-ChLines         equ "="
+ChTile          equ $7f
+;ChLines         equ "="
+ChLines         equ $ff
 KeyLeftArrow    equ $88
 KeyRightArrow   equ $95
 KeyUpArrow      equ $8b
