@@ -3,7 +3,9 @@
 *** It increments the random seed while it waits for a key
 ***
 SplashScreen    jsr HOME                        ; clear screen
+                DO ]USE_EXT_CHAR
                 sta ALTCHARSETON                ; enable alt charset
+                FIN
                 JSRDisplayStr Splash00
                 JSRDisplayStr Splash01
                 JSRDisplayStr Splash02
@@ -34,25 +36,51 @@ splashLoop0     clc                             ; increment the 32bit seed
                 sta STROBE
                 rts
                 * splash screen strings
+                DO ]USE_EXT_CHAR
 Splash00        dfb $8b,$04,16
                 asc "S P E T R // S !"
-Splash01        dfb $87,$05,24
+                ELSE
+Splash00        dfb $8b,$04,16
+                asc "S P E T R ][ S !"
+                FIN
+                DO ]USE_EXT_CHAR
+Splash01        dfb $86,$05,25
                 asc "For "
                 dfb $40
-                asc " Apple // Computers"
+                asc " Apple //e Computers"
+                ELSE
+Splash01        dfb $87,$05,22
+                asc "By Eric Sperano (2021)"
+                FIN
 Splash02        dfb $30,$04,22
                 asc "Keyboard Game Controls"
 Splash03        dfb $30,$05,19
+                DO ]USE_EXT_CHAR
                 dfb $4b
+                ELSE
+                dfb "Z"
+                FIN
                 asc "      Rotate Piece"
 Splash04        dfb $b0,$05,22
+                DO ]USE_EXT_CHAR
                 dfb $48
+                ELSE
+                dfb "N"
+                FIN
                 asc "      Move Piece Left"
 Splash05        dfb $30,$06,23
+                DO ]USE_EXT_CHAR
                 dfb $55
+                ELSE
+                dfb "M"
+                FIN
                 asc "      Move Piece Right"
 Splash06        dfb $b0,$06,22
+                DO ]USE_EXT_CHAR
                 dfb $4a
+                ELSE
+                dfb "X"
+                FIN
                 asc "      Move Piece Down"
 Splash07        dfb $30,$07,17
                 asc "Space  Drop Piece"
