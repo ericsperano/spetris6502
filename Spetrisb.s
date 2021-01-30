@@ -8,6 +8,7 @@
                 put Spetris.Str
                 put Spetris.Random
                 put Spetris.Piece
+                put Spetris.Field
                 put Spetris.Score
                 put Spetris.Sleep
                 put Spetris.Splash

@@ -1,5 +1,6 @@
 ***
 *** SPETRIS FOR THE APPLE II COMPUTER
+*** TODO ! DO NOT USE PHX/PHY ETC  ON OLD APPLE II
 ***
                 org $2000
                 use macro/InitPtr.Macs
@@ -7,15 +8,16 @@
                 use macro/JSRDisplayStr.Macs
                 * begin program
                 jsr SplashScreen                ; display screen and wait for a key press
-                jsr HOME                        ; clear screen
-                DO ]USE_EXT_CHAR
-                sta ALTCHARSETON                ; enable alternate char set
-                FIN
                 * init constant zero page pointers
                 InitPtr PointsTable;PTR_Points
                 InitPtr Field;PTR_Field
                 jsr InitRandom                  ; generate some random numbers ; TODO use or Macro?
+StartNewGame    jsr HOME                        ; clear screen
+                DO ]USE_EXT_CHAR
+                sta ALTCHARSETON                ; enable alternate char set
+                FIN
                 jsr NewGame                     ; initialize new game           ; TODO use or Macro?
+                jsr InitField
                 JSRDisplayStr Title             ; display all the right side lables
                 JSRDisplayStr HighScoreL
                 JSRDisplayBCD HighScore
@@ -28,13 +30,13 @@
                 JSRDisplayStr NextPieceL
                 jsr NewPiece                    ; get 2 new piece at the start (current and next)
 startRound      jsr NewPiece                    ; initialize this round
-                jsr DrawNextPiece               ; draw the new next piece
                 jsr InitTryPieces
                 jsr DoesPieceFit                ; first check if it would fit
                 bcs roundLoop2                  ; it does, go on with the loop for this round
-                jmp endGame                     ; it does not, game over!
+                jmp GameOver                    ; it does not, game over!
 roundLoop       jsr InitTryPieces
-roundLoop2      ldx FlagRefreshScr
+roundLoop2      jsr DrawNextPiece               ; draw the next piece once we know the current one fits
+                ldx FlagRefreshScr
                 beq roundSleep
                 jsr DrawField
                 jsr DrawPiece
@@ -100,6 +102,18 @@ loopSleep       jsr Sleep
                 ldx #1
                 stx FlagRefreshScr
 endRound        jmp startRound
+GameOver        JSRDisplayStr NewGameL
+askNewGameLoop  lda KYBD                        ; poll keyboard
+                cmp #$80                        ; key pressed?
+                bcc askNewGameLoop              ; no, keep polling
+                sta STROBE                      ; key pressed
+                cmp #"y"
+                bne testNewGameN
+                jmp StartNewGame
+testNewGameN    cmp #"n"
+                bne askNewGameLoop
+exitGame        jsr HOME
+                rts
 ***
 ***
 ***
@@ -168,9 +182,6 @@ pauseLoop       lda KYBD                        ; poll keyboard
 endPKey         rts
 ***
 ***
-endGame         nop
-exitGame        jsr HOME
-                rts
 ***
 ***
 ***
@@ -294,7 +305,7 @@ dpfLoop0        lda (PTR_Piece),y
                 beq dpfNextCh
                 * pixel is on, need to check if it's empty in the field
                 lda (PTR_Field),y
-                cmp #" "
+                cmp #BG
                 beq dpfNextCh
                 clc                             ; clear carry and return, does not fit
                 rts
@@ -371,7 +382,7 @@ CheckForLines   lda #0
                 ldx #16
 cflCheckRow     ldy #2                          ; start at pos 2 in the row
 cflLoop0        lda (PTR_Field),y
-                cmp #" "                        ; is it a space? TODO constant
+                cmp #BG                         ; is it a space? TODO constant
                 beq cflNextRow                  ; yeah so not a line, look next row
                 iny                             ; no, keep looking previous char on row
                 cpy #12                         ; loop if we haven't reach the right side
@@ -448,60 +459,6 @@ rlEnd           lda PTR_Field+1
                 cmp #<Field
                 bne rlLoop0                     ; no, check previous line
                 rts
-***
-***
-***
-FieldCols      equ 14
-FieldRows      equ 17
-*Field           ds  160,$a0
-* total field size is 14*17=238 so we can use an 8bit index
-                DO ]USE_EXT_CHAR
-LBR             equ $5a
-RBR             equ $5f
-LCR             equ " "
-RCR             equ " "
-BBR             equ $4c
-                ELSE
-LBR             equ $20
-RBR             equ $20
-LCR             equ $20
-RCR             equ $20
-BBR             equ $20
-                FIN
-Field           dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-FieldBottom     dfb $a0,LBR,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,$a0,RBR,$a0
-                dfb $a0,LCR,BBR,BBR,BBR,BBR,BBR,BBR,BBR,BBR,BBR,BBR,RCR,$a0
-FieldPositions  dfb $80,$05
-                dfb $00,$06
-                dfb $80,$06
-                dfb $00,$07
-                dfb $80,$07
-                dfb $28,$04
-                dfb $a8,$04
-                dfb $28,$05
-                dfb $a8,$05
-                dfb $28,$06
-                dfb $a8,$06
-                dfb $28,$07
-                dfb $a8,$07
-                dfb $50,$04
-                dfb $d0,$04
-                dfb $50,$05
-                dfb $d0,$05
 *
 *
 Title           dfb $93,$05,16
@@ -514,9 +471,10 @@ LevelL          dfb $90,$07,6
                 asc "Level:"
 PausedL         dfb $de,$06,11
                 asc "P A U S E D"
+NewGameL        dfb $de,$05,13
+                asc "New Game? Y/N"
 PausedBlankL    dfb $de,$06,11
                 asc "           "
-
 SpeedCountLo    dfb 0
 SpeedCountHi    dfb 0
 SpeedLo         dfb 0
@@ -549,8 +507,8 @@ ChTransparent   equ '.'
 ChTile          equ $7f
 ChLines         equ $ff
                 ELSE
-ChTile          equ $23
-ChLines         equ "-"
+ChTile          equ "#"
+ChLines         equ '-'
                 FIN
 KeyLeftArrow    equ $88
 KeyRightArrow   equ $95
