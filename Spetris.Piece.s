@@ -113,17 +113,17 @@ dnpend          rts
 IncTotalPieces  sed                             ; bcd mode
                 clc
                 ldx #2                          ; 3 bytes - 1
-                lda TotalPieces,x
+                lda TotalPiecesBCD,x
                 adc #1
-                sta TotalPieces,x
+                sta TotalPiecesBCD,x
                 dex
-                lda TotalPieces,x
+                lda TotalPiecesBCD,x
                 adc #0
-                sta TotalPieces,x
+                sta TotalPiecesBCD,x
                 dex
-                lda TotalPieces,x
+                lda TotalPiecesBCD,x
                 adc #0
-                sta TotalPieces,x
+                sta TotalPiecesBCD,x
                 dex
                 cld                             ; binary mode
                 rts
@@ -203,5 +203,5 @@ PieceRot        dfb 0
 TryPieceX       dfb 0
 TryPieceY       dfb 0
 TryPieceRot     dfb 0
-TotalPiecesBCD  dfb $47,$04,$03
-TotalPieces     dfb $00,$00,$00
+TotalPieces     dfb $47,$04,$03
+TotalPiecesBCD  dfb $00,$00,$00

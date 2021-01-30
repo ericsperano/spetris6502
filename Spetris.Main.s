@@ -24,9 +24,9 @@ StartNewGame    jsr HOME                        ; clear screen
                 JSRDisplayStr ScoreL
                 JSRDisplayBCD Score
                 JSRDisplayStr LevelL
-                JSRDisplayBCD LevelBCD
+                JSRDisplayBCD Level
                 JSRDisplayStr TotalPiecesL
-                JSRDisplayBCD TotalPiecesBCD
+                JSRDisplayBCD TotalPieces
                 JSRDisplayStr NextPieceL
                 jsr NewPiece                    ; get 2 new piece at the start (current and next)
 startRound      jsr NewPiece                    ; initialize this round
@@ -48,25 +48,25 @@ roundSleep      ldx FlagFalling                 ; is it falling?
 roundSleep1     jsr Sleep
                 clc
                 *inc SpeedCount                  ; increment the speed count
-                lda SpeedCountLo
+                lda SpeedCount+1
                 adc #1
-                sta SpeedCountLo
-                lda SpeedCountHi
+                sta SpeedCount+1
+                lda SpeedCount
                 adc #0
-                sta SpeedCountHi
+                sta SpeedCount
                 * 16 bits comparisons of Speed and SpeedCount
-                lda SpeedCountHi
-                cmp SpeedHi
+                lda SpeedCount
+                cmp Speed
                 bcc pollKeyboard                ;X < Y
-                lda SpeedCountLo
-                cmp SpeedLo
+                lda SpeedCount+1
+                cmp Speed+1
                 bcc pollKeyboard
                 ldx #1                          ; we reached speed max
                 stx FlagForceDown               ; yes, will force down and refresh screen
                 stx FlagRefreshScr
                 dex
-                stx SpeedCountLo                ; reset the speed counter
-                stx SpeedCountHi
+                stx SpeedCount+1                ; reset the speed counter
+                stx SpeedCount
 pollKeyboard    lda KYBD                        ; polls keyboard
                 cmp #$80
                 bcc chkForceDown                ; no key pressed
@@ -90,10 +90,10 @@ roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 JSRDisplayBCD Score
                 JSRDisplayBCD HighScore
                 jsr IncTotalPieces
-                JSRDisplayBCD TotalPiecesBCD
+                JSRDisplayBCD TotalPieces
                 ldx LinesCount
                 beq endRound                    ; no, go get next piece
-                jsr DrawField                   ; yep, draw and sleep for animation
+                jsr DrawField                   ; yes, draw and sleep for animation
                 ldx #SleepTime
 loopSleep       jsr Sleep
                 dex
@@ -101,6 +101,8 @@ loopSleep       jsr Sleep
                 jsr RemoveLines                 ; animation displayed, remove the lines from the field
                 ldx #1
                 stx FlagRefreshScr
+                jsr CheckLevel                  ; go check level
+                JSRDisplayBCD Level
 endRound        jmp startRound
 GameOver        JSRDisplayStr NewGameL
 askNewGameLoop  lda KYBD                        ; poll keyboard
@@ -183,23 +185,50 @@ endPKey         rts
 ***
 ***
 ***
+CheckLevel      ldx LinesCount
+                sed                             ; decimal mode
+                clc
+clLoop0         lda LevelLinesBCD
+                adc #1
+                and #$0f
+                bne clSvCounter
+                lda LevelBCD                    ; we have to do it in A, inc does not support bcd
+                clc
+                adc #1
+                sta LevelBCD
+                cld                             ; clear decimal, speed is binary
+                sec                             ; set carry for substraction
+                lda Speed+1                     ; speed lo byte
+                sbc #$20                        ; substract 10
+                sta Speed+1
+                lda Speed                       ; speed hi byte
+                sbc #0
+                sta Speed
+                sed
+                lda #0                          ; reset counter
+clSvCounter     sta LevelLinesBCD
+                dex
+                bne clLoop0
+                cld                             ; binary mode
+                rts
+***
 ***
 ***
 NewGame         lda #0
                 sta FlagQuitGame
-                sta SpeedCountLo
-                sta SpeedCountHi
+                sta SpeedCount+1
+                sta SpeedCount
                 sta ScoreBCD
                 sta ScoreBCD+1
                 sta ScoreBCD+2
                 sta ScoreBCD+3
-                lda #$ff
-                sta SpeedLo
-                lda #5
-                sta SpeedHi
+                sta LevelLinesBCD
+                sta Speed+1
+                lda #6
+                sta Speed
                 lda #1
                 sta FlagRefreshScr
-                sta Level
+                sta LevelBCD
                 rts
 ***
 *** SetScreenPos
@@ -475,17 +504,16 @@ NewGameL        dfb $de,$05,13
                 asc "New Game? Y/N"
 PausedBlankL    dfb $de,$06,11
                 asc "           "
-SpeedCountLo    dfb 0
-SpeedCountHi    dfb 0
-SpeedLo         dfb 0
-SpeedHi         dfb 0
+SpeedCount      dfb 0,0
+Speed           dfb 0
 LinesCount      dfb 0
 FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0
 FlagFalling     dfb 0
 FlagQuitGame    dfb 0
-LevelBCD        dfb $a3,$07,$01
-Level           dfb $00
+Level           dfb $a3,$07,$01
+LevelBCD        dfb $00
+LevelLinesBCD   dfb $00
 PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd
 ***
 *** zero page pointers
