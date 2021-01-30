@@ -1,5 +1,7 @@
 ***
-***
+*** Increment the score
+*** Formula is  ((1 << lines) * 100) + 25
+*** We cheat by indexing a pre-calcultated points table
 ***
 IncScore        lda LinesCount                  ; y will be the index for the points table
                 asl                             ; multiply linescount by 2 because each entry is 2 bytes
@@ -17,7 +19,7 @@ IncScore        lda LinesCount                  ; y will be the index for the po
                 adc (PTR_Points),y              ; add hi byte of points to a
                 sta ScoreBCD,x                  ; store in score
                 dex                             ; decrement index
-                lda ScoreBCD,x
+                lda ScoreBCD,x                  ; add carry on the last two bytes
                 adc #0
                 sta ScoreBCD,x
                 dex
