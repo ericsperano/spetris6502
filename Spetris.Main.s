@@ -223,6 +223,9 @@ NewGame         lda #0
                 sta ScoreBCD+2
                 sta ScoreBCD+3
                 sta LevelLinesBCD
+                sta TotalPiecesBCD
+                sta TotalPiecesBCD+1
+                sta TotalPiecesBCD+2
                 sta Speed+1
                 lda #6
                 sta Speed
