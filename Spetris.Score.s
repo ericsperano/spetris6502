@@ -7,7 +7,7 @@ IncScore        lda LinesCount                  ; y will be the index for the po
                 asl                             ; multiply linescount by 2 because each entry is 2 bytes
                 tay
                 iny                             ; lo byte is in +1
-                ldx #3                          ; start index for ScoreBCD
+                ldx #3                          ; start index for ScoreBCD TODO constants
                 clc
                 sed                             ; set decimal mode
                 lda ScoreBCD,x                  ; load lowest byte of score
@@ -28,30 +28,22 @@ IncScore        lda LinesCount                  ; y will be the index for the po
                 sta ScoreBCD,x
                 cld                             ; binary mode
                 * 32 bits comparisons of Score and HighScore
-                ldx #0
-                lda HighScoreBCD,x
-                cmp ScoreBCD,x
-                bcc updateScore                  ; high score < score
-                inx
-                lda HighScoreBCD,x
-                cmp ScoreBCD,x
-                bcc updateScore                  ; high score < score
-                inx
-                lda HighScoreBCD,x
-                cmp ScoreBCD,x
-                bcc updateScore                  ; high score < score
-                inx
-                lda HighScoreBCD,x
-                cmp ScoreBCD,x
-                bcc updateScore                  ; high score < score
-                jmp endCmpScore
-updateScore     ldx #0
-updateScoreL    lda ScoreBCD,x
+                ldx #0                          ; compare hihghest byte first
+isCmpLoop       lda ScoreBCD,x
+                cmp HighScoreBCD,x
+                beq isNextByte                  ; same value, compare next character
+                bcs isUpdScoreLoop              ; acuumulator > memory (score byte > high score)
+                bcc isEndCmp                    ; accumulator < memory (score byte < high score)
+isNextByte      inx
+                cpx #4                          ; end of BCD number? TODO constant
+                bne isCmpLoop                   ; keep comparing
+isEndCmp        rts                             ; no need to update high score, return
+isUpdScoreLoop  lda ScoreBCD,x
                 sta HighScoreBCD,x
                 inx
                 cpx #4
-                bne updateScoreL
-endCmpScore     rts
+                bne isUpdScoreLoop
+                rts
 ***
 ***
 ***
