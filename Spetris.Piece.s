@@ -108,11 +108,11 @@ dnpNextCh       iny
                 jmp dnpLoop1
 dnpend          rts
 ***
-***
+*** IncTotalPieces: Increment the global Total Pieces counter
 ***
 IncTotalPieces  sed                             ; bcd mode
                 clc
-                ldx #2                          ; 3 bytes - 1
+                ldx #2                          ; 3 bytes - 1 TODO constant
                 lda TotalPiecesBCD,x
                 adc #1
                 sta TotalPiecesBCD,x
@@ -128,22 +128,22 @@ IncTotalPieces  sed                             ; bcd mode
                 cld                             ; binary mode
                 rts
 ***
+*** NewPiece: NextPiece becomde NewPiece and a new random NextPiece is generated
 ***
-***
-NewPiece        lda #0
+NewPiece        lda #0                          ; initialize piece variables
                 sta PieceY
                 sta PieceRot
                 sta FlagFalling
-                lda #5
+                lda #5                          ; centered in the field
                 sta PieceX
-                lda NextPieceId
+                lda NextPieceId                 ; next piece id becomes current piece id
                 sta PieceId
-npRand          jsr RandomNumber
-                lda Rand1
-                and #%00000111
-                cmp #7
+npRand          jsr RandomNumber                ; Get a random number from 0 to ff
+                lda Rand
+                and #%00000111                  ; keep the last 3 bits (0 to 7)
+                cmp #7                          ; we just need 0 to 6 (7 pieces)
                 beq npRand
-                sta NextPieceId
+                sta NextPieceId                 ; save random piece id
                 rts
 ***
 *** InitTryPieces: Copy "Piece*"" variables into "TryPiece*" variables
@@ -166,42 +166,43 @@ NextPieceL      dfb $38,$05,11
                 asc "Next Piece:"
 *
 PieceLen        equ 16
-PieceStructLen  equ 4*PieceLen              ; 4 different rotations
-Pieces          asc '..X...X...X...X.'   ; rotation 0 piece 0
-                asc '........XXXX....'   ; rotation 1
-                asc '.X...X...X...X..'   ; rotation 2
-                asc '....XXXX........'   ; rotation 3
-                asc '..X..XX...X.....'   ; rotation 0 piece 1
-                asc '......X..XXX....'   ; rotation 1
-                asc '.....X...XX..X..'   ; rotation 2
-                asc '....XXX..X......'   ; rotation 3
-                asc '.....XX..XX.....'   ; rotation 0 piece 2
-                asc '.....XX..XX.....'   ; rotation 1
-                asc '.....XX..XX.....'   ; rotation 2
-                asc '.....XX..XX.....'   ; rotation 3
-                asc '..X..XX..X......'   ; rotation 0 piece 3
-                asc '.....XX...XX....'   ; rotation 1
-                asc '......X..XX..X..'   ; rotation 2
-                asc '....XX...XX.....'   ; rotation 3
-                asc '.X...XX...X.....'   ; rotation 0 piece 4
-                asc '......XX.XX.....'   ; rotation 1
-                asc '.....X...XX...X.'   ; rotation 2
-                asc '.....XX.XX......'   ; rotation 3
-                asc '.X...X...XX.....'   ; rotation 0 piece 5
-                asc '.....XXX.X......'   ; rotation 1
-                asc '.....XX...X...X.'   ; rotation 2
-                asc '......X.XXX.....'   ; rotation 3
-                asc '..X...X..XX.....'   ; rotation 0 piece 6
-                asc '.....X...XXX....'   ; rotation 1
-                asc '.....XX..X...X..'   ; rotation 2
-                asc '....XXX...X.....'   ; rotation 3
+PieceStructLen  equ 4*PieceLen                  ; 4 different rotations
+Pieces          asc '..X...X...X...X.'          ; rotation 0 piece 0
+                asc '........XXXX....'          ; rotation 1
+                asc '.X...X...X...X..'          ; rotation 2
+                asc '....XXXX........'          ; rotation 3
+                asc '..X..XX...X.....'          ; rotation 0 piece 1
+                asc '......X..XXX....'          ; rotation 1
+                asc '.....X...XX..X..'          ; rotation 2
+                asc '....XXX..X......'          ; rotation 3
+                asc '.....XX..XX.....'          ; rotation 0 piece 2
+                asc '.....XX..XX.....'          ; rotation 1
+                asc '.....XX..XX.....'          ; rotation 2
+                asc '.....XX..XX.....'          ; rotation 3
+                asc '..X..XX..X......'          ; rotation 0 piece 3
+                asc '.....XX...XX....'          ; rotation 1
+                asc '......X..XX..X..'          ; rotation 2
+                asc '....XX...XX.....'          ; rotation 3
+                asc '.X...XX...X.....'          ; rotation 0 piece 4
+                asc '......XX.XX.....'          ; rotation 1
+                asc '.....X...XX...X.'          ; rotation 2
+                asc '.....XX.XX......'          ; rotation 3
+                asc '.X...X...XX.....'          ; rotation 0 piece 5
+                asc '.....XXX.X......'          ; rotation 1
+                asc '.....XX...X...X.'          ; rotation 2
+                asc '......X.XXX.....'          ; rotation 3
+                asc '..X...X..XX.....'          ; rotation 0 piece 6
+                asc '.....X...XXX....'          ; rotation 1
+                asc '.....XX..X...X..'          ; rotation 2
+                asc '....XXX...X.....'          ; rotation 3
 PieceId         dfb 0 ; these all get initialized in NewGame
 NextPieceId     dfb 0
 PieceX          dfb 0
 PieceY          dfb 0
 PieceRot        dfb 0
+TotalPieces     dfb $47,$04,$03
+TotalPiecesBCD  dfb $00,$00,$00
+; TryPieceX,Y and Rot are input parameters to DoesPieceFit subroutine
 TryPieceX       dfb 0
 TryPieceY       dfb 0
 TryPieceRot     dfb 0
-TotalPieces     dfb $47,$04,$03
-TotalPiecesBCD  dfb $00,$00,$00

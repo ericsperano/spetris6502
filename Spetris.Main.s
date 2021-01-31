@@ -1,6 +1,9 @@
 ***
 *** SPETRIS FOR THE APPLE II COMPUTER
 *** TODO ! DO NOT USE PHX/PHY ETC  ON OLD APPLE II
+*** TODO Bug around level 7
+*** TODO New Piece does not always show up
+*** TODO blinking game over
 ***
                 org $2000
                 use macro/InitPtr.Macs
@@ -503,7 +506,7 @@ LevelL          dfb $90,$07,6
                 asc "Level:"
 PausedL         dfb $de,$06,11
                 asc "P A U S E D"
-NewGameL        dfb $de,$05,13
+NewGameL        dfb $dd,$06,13
                 asc "New Game? Y/N"
 PausedBlankL    dfb $de,$06,11
                 asc "           "

@@ -18,18 +18,18 @@ SplashScreen    jsr HOME                        ; clear screen
                 JSRDisplayStr Splash09
                 JSRDisplayStr Splash10
 splashLoop0     clc                             ; increment the 32bit seed
-                lda Rand1
+                lda Rand
                 adc #1
-                sta Rand1
-                lda Rand2
+                sta Rand
+                lda Rand+1
                 adc #0
-                sta Rand2
-                lda Rand3
+                sta Rand+1
+                lda Rand+2
                 adc #0
-                sta Rand3
-                lda Rand4
+                sta Rand+2
+                lda Rand+3
                 adc #0
-                sta Rand4
+                sta Rand+3
                 lda KYBD                        ; poll keyboard
                 cmp #$80                        ; key pressed?
                 bcc splashLoop0                 ; no, loop
