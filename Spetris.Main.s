@@ -1,27 +1,28 @@
 ***
 *** SPETRIS FOR THE APPLE II COMPUTER
 *** TODO ! DO NOT USE PHX/PHY ETC  ON OLD APPLE II
-*** TODO Bug around level 7
 *** TODO New Piece does not always show up
 *** TODO blinking game over
+*** Second piece move down by 2
 ***
                 org $2000
+                use macro/IncSpeedCount.Macs
+                use macro/InitGame.Macs
                 use macro/InitPtr.Macs
+                use macro/InitRandom.Macs
                 use macro/JSRDisplayBCD.Macs
                 use macro/JSRDisplayStr.Macs
-                * begin program
                 jsr SplashScreen                ; display screen and wait for a key press
-                * init constant zero page pointers
-                InitPtr PointsTable;PTR_Points
+                InitRandom                      ; generate some random numbers
+                InitPtr PointsTable;PTR_Points  ; init constant zero page pointers
                 InitPtr Field;PTR_Field
-                jsr InitRandom                  ; generate some random numbers ; TODO use or Macro?
 StartNewGame    jsr HOME                        ; clear screen
                 DO ]USE_EXT_CHAR
                 sta ALTCHARSETON                ; enable alternate char set
                 FIN
-                jsr NewGame                     ; initialize new game           ; TODO use or Macro?
-                jsr InitField
-                JSRDisplayStr Title             ; display all the right side lables
+                InitGame                        ; initialize new game
+                jsr InitField                   ; initialize clean field
+                JSRDisplayStr Title             ; display all the right side labels
                 JSRDisplayStr HighScoreL
                 JSRDisplayBCD HighScore
                 JSRDisplayStr ScoreL
@@ -33,59 +34,42 @@ StartNewGame    jsr HOME                        ; clear screen
                 JSRDisplayStr NextPieceL
                 jsr NewPiece                    ; get 2 new piece at the start (current and next)
 startRound      jsr NewPiece                    ; initialize this round
+                lda #0                          ; reset SpeedCount
+                sta SpeedCount+1
+                sta SpeedCount
                 jsr InitTryPieces
                 jsr DoesPieceFit                ; first check if it would fit
                 bcs roundLoop2                  ; it does, go on with the loop for this round
                 jmp GameOver                    ; it does not, game over!
 roundLoop       jsr InitTryPieces
 roundLoop2      jsr DrawNextPiece               ; draw the next piece once we know the current one fits
-                ldx FlagRefreshScr
-                beq roundSleep
-                jsr DrawField
+                ldx FlagRefreshScr              ; check if we need to refresh the screen
+                beq checkFalling                ; no, go sleep a little
+                jsr DrawField                   ; refresh the screen
                 jsr DrawPiece
                 dec FlagRefreshScr              ; clear the refresh screen flag
-roundSleep      ldx FlagFalling                 ; is it falling?
-                beq roundSleep1                 ; no, go sleep
+checkFalling    ldx FlagFalling                 ; is it falling?
+                beq roundSleep                  ; no, go sleep
                 stx FlagForceDown               ; yes, will force down and refresh screen
                 stx FlagRefreshScr
-roundSleep1     jsr Sleep
-                clc
-                *inc SpeedCount                  ; increment the speed count
-                lda SpeedCount+1
-                adc #1
-                sta SpeedCount+1
-                lda SpeedCount
-                adc #0
-                sta SpeedCount
-                * 16 bits comparisons of Speed and SpeedCount
-                lda SpeedCount
-                cmp Speed
-                bcc pollKeyboard                ;X < Y
-                lda SpeedCount+1
-                cmp Speed+1
-                bcc pollKeyboard
-                ldx #1                          ; we reached speed max
-                stx FlagForceDown               ; yes, will force down and refresh screen
-                stx FlagRefreshScr
-                dex
-                stx SpeedCount+1                ; reset the speed counter
-                stx SpeedCount
+roundSleep      jsr Sleep
+                IncSpeedCount pollKeyboard      ; incr speed. set FlagForceDown to true if it reach limit
 pollKeyboard    lda KYBD                        ; polls keyboard
                 cmp #$80
-                bcc chkForceDown                ; no key pressed
+                bcc chkForceDown                ; no key pressed, go check force down flag
                 jsr KeyPressed                  ; go handle key pressed
                 ldx FlagQuitGame                ; esc pressed?
                 beq chkForceDown                ; no, go on
                 jmp exitGame                    ; yes, exit game
 chkForceDown    ldx FlagForceDown               ; is it time for piece to go down?
-                bne moveDown
-                jmp roundLoop                   ; no
-moveDown        jsr InitTryPieces
-                inc TryPieceY                   ; check if it can go further down
+                bne moveDown                    ; yes
+                jmp roundLoop                   ; no, loop
+moveDown        dec FlagForceDown               ; clear the flag
+                jsr InitTryPieces               ; ok, time to move the piece down
+                inc TryPieceY                   ; first, check if it can go further down
                 jsr DoesPieceFit
                 bcc roundLockPiece              ; it doesnt, we lock
                 inc PieceY
-                dec FlagForceDown               ; clear the flag
                 jmp roundLoop
 roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr CheckForLines               ; check if it has complete lines
@@ -187,7 +171,7 @@ pauseLoop       lda KYBD                        ; poll keyboard
 endPKey         rts
 ***
 ***
-***
+***TODO check if substract < 0
 CheckLevel      ldx LinesCount
                 sed                             ; decimal mode
                 clc
@@ -201,40 +185,18 @@ clLoop0         lda LevelLinesBCD
                 sta LevelBCD
                 cld                             ; clear decimal, speed is binary
                 sec                             ; set carry for substraction
-                lda Speed+1                     ; speed lo byte
-                sbc #$20                        ; substract 10
-                sta Speed+1
-                lda Speed                       ; speed hi byte
+                lda SpeedLimit+1                ; speed lo byte
+                sbc #$30                        ; substract $30
+                sta SpeedLimit+1
+                lda SpeedLimit                  ; speed hi byte
                 sbc #0
-                sta Speed
+                sta SpeedLimit
                 sed
                 lda #0                          ; reset counter
 clSvCounter     sta LevelLinesBCD
                 dex
                 bne clLoop0
                 cld                             ; binary mode
-                rts
-***
-***
-***
-NewGame         lda #0
-                sta FlagQuitGame
-                sta SpeedCount+1
-                sta SpeedCount
-                sta ScoreBCD
-                sta ScoreBCD+1
-                sta ScoreBCD+2
-                sta ScoreBCD+3
-                sta LevelLinesBCD
-                sta TotalPiecesBCD
-                sta TotalPiecesBCD+1
-                sta TotalPiecesBCD+2
-                sta Speed+1
-                lda #6
-                sta Speed
-                lda #1
-                sta FlagRefreshScr
-                sta LevelBCD
                 rts
 ***
 *** SetScreenPos
@@ -284,43 +246,6 @@ SFP_End         lda PTR_Field
                 sta PTR_Field+1
                 ply
                 rts
-***
-*** Draw Field
-***
-DrawField       InitPtr Field;PTR_Field
-                InitPtr FieldPositions;PTR_FieldPos
-                ldy #0
-                ldx #0 ; row counter
-                sty DF_FieldPosY
-                * initialize the screen pointer
-DF_Loop1        ldy DF_FieldPosY
-                lda (PTR_FieldPos),y
-                sta PTR_ScreenPos
-                iny
-                lda (PTR_FieldPos),y
-                sta PTR_ScreenPos+1
-                iny
-                sty DF_FieldPosY ; save y for field pos
-                ldy #0
-DF_Loop0        lda (PTR_Field),y
-                sta (PTR_ScreenPos),y
-                iny
-                cpy #FieldCols
-                bne DF_Loop0
-                inx
-                cpx #FieldRows
-                beq DF_End
-                clc                              ; clear carry flag
-                lda PTR_Field         ; add 3 to lo byte of struct pointer to point to text to print
-                adc #FieldCols
-                sta PTR_Field
-                lda PTR_Field+1
-                adc #0
-                sta PTR_Field+1
-                jmp DF_Loop1
-DF_End          rts
-*
-DF_FieldPosY    dfb 0
 ***
 ***  DoesPieceFit
 ***
@@ -511,7 +436,7 @@ NewGameL        dfb $dd,$06,13
 PausedBlankL    dfb $de,$06,11
                 asc "           "
 SpeedCount      dfb 0,0
-Speed           dfb 0
+SpeedLimit      dfb 0,0
 LinesCount      dfb 0
 FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0

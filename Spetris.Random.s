@@ -19,14 +19,6 @@ RandomNumber    ror Rand+3      ; Bit 25 to carry
                 sta Rand
                 rts
 ***
-*** InitRandom - Generate a few random numbers to kick things off
-***
-InitRandom      ldx #$20
-irLoop          jsr RandomNumber
-                dex
-                bne irLoop
-                rts
-***
 *** 32 bits random number.
 ***
 Rand           dfb 0,0,0,0

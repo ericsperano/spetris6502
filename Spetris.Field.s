@@ -47,6 +47,47 @@ ifLoop2         sta Field,x
                 pla
                 rts
 ***
+*** Draw Field
+***
+DrawField       InitPtr Field;PTR_Field
+                InitPtr FieldPositions;PTR_FieldPos
+                ldy #0
+                ldx #0 ; row counter
+                sty dfTmpPosY
+                * initialize the screen pointer
+dfLoop1         ldy dfTmpPosY
+                lda (PTR_FieldPos),y
+                sta PTR_ScreenPos
+                iny
+                lda (PTR_FieldPos),y
+                sta PTR_ScreenPos+1
+                iny
+                sty dfTmpPosY                   ; save y for field pos
+                ldy #0
+dfLoop0         lda (PTR_Field),y
+                sta (PTR_ScreenPos),y
+                iny
+                cpy #FieldCols
+                bne dfLoop0
+                inx
+                cpx #FieldRows
+                beq dfEnd
+                clc                              ; clear carry flag
+                lda PTR_Field         ; add 3 to lo byte of struct pointer to point to text to print
+                adc #FieldCols
+                sta PTR_Field
+                lda PTR_Field+1
+                adc #0
+                sta PTR_Field+1
+                jmp dfLoop1
+dfEnd           rts
+dfTmpPosY       dfb 0
+
+***
+***
+***
+
+***
 ***
 ***
 FieldCols       equ 14

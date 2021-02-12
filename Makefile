@@ -26,4 +26,4 @@ copy: all
 	cp $(DSK) /Volumes/APPLE\ II/SPETRIS.po
 
 clean:
-	@rm -rfv $(DSK) $(OBJ) _FileInformation.txt *.log Spetris_Output.txt
+	@rm -rfv $(DSK) $(OBJ) _FileInformation.txt *.log Spetris*_Output.txt
