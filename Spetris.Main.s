@@ -6,7 +6,6 @@
 *** TODO keyboard has to work with lowercase/uppercase
 *** Second piece move down by 2
 ***
-                org $2000
                 use macro/IncSpeedCount.Macs
                 use macro/InitGame.Macs
                 use macro/InitPtr.Macs
