@@ -3,6 +3,7 @@
 *** TODO ! DO NOT USE PHX/PHY ETC  ON OLD APPLE II
 *** TODO New Piece does not always show up
 *** TODO blinking game over
+*** TODO keyboard has to work with lowercase/uppercase
 *** Second piece move down by 2
 ***
                 org $2000
