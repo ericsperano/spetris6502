@@ -79,7 +79,7 @@ DrawNextPiece   lda #0 ; default rotation
                 jsr SetPtrPiece
                 ldx #4 ; 4 rows
                 stx drawPieceRows
-                ldy #10 ; first line is 9
+                ldy #11 ; first line is 10
                 sty drawPieceY
 dnpLoop1        ldy drawPieceY
                 ldx #$10
@@ -160,11 +160,6 @@ InitTryPieces   pha                             ; save a
 ***
 ***
 ***
-TotalPiecesL    dfb $38,$04,13
-                asc "Total Pieces:"
-NextPieceL      dfb $38,$05,11
-                asc "Next Piece:"
-*
 PieceLen        equ 16
 PieceStructLen  equ 4*PieceLen                  ; 4 different rotations
 Pieces          asc '..X...X...X...X.'          ; rotation 0 piece 0

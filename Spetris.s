@@ -11,5 +11,6 @@
                 put Spetris.Piece
                 put Spetris.Field
                 put Spetris.Score
+                put Spetris.Screen
                 put Spetris.Sleep
                 put Spetris.Splash

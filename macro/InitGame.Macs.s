@@ -10,7 +10,8 @@ InitGame        MAC
                 sta ScoreBCD+1
                 sta ScoreBCD+2
                 sta ScoreBCD+3
-                sta LevelLinesBCD
+                sta TotalLinesBCD
+                sta TotalLinesBCD+1
                 sta TotalPiecesBCD
                 sta TotalPiecesBCD+1
                 sta TotalPiecesBCD+2

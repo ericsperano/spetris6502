@@ -47,10 +47,6 @@ isUpdScoreLoop  lda ScoreBCD,x
 ***
 ***
 ***
-HighScoreL      dfb $90,$06,11
-                asc "High Score:"
-ScoreL          dfb $10,$07,6
-                asc "Score:"
 HighScore       dfb $9d,$06,$04
 HighScoreBCD    dfb $00,$00,$00,$00 ; bcd encoded
 Score           dfb $1d,$07,$04

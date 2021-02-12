@@ -4,7 +4,11 @@
 *** TODO New Piece does not always show up
 *** TODO blinking game over
 *** TODO keyboard has to work with lowercase/uppercase
-*** Second piece move down by 2
+*** TODO alternate keys (no arrow keys)
+*** TODO select mouse text or not
+*** TODO regular/reverse screen
+*** TODO confirm quit on escape key
+*** TODO make it work in DOS 3.3
 ***
                 use macro/IncSpeedCount.Macs
                 use macro/InitGame.Macs
@@ -31,6 +35,8 @@ StartNewGame    jsr HOME                        ; clear screen
                 JSRDisplayBCD Level
                 JSRDisplayStr TotalPiecesL
                 JSRDisplayBCD TotalPieces
+                JSRDisplayStr TotalLinesL
+                JSRDisplayBCD TotalLines
                 JSRDisplayStr NextPieceL
                 jsr NewPiece                    ; get 2 new piece at the start (current and next)
 startRound      jsr NewPiece                    ; initialize this round
@@ -76,10 +82,13 @@ roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr IncScore
                 JSRDisplayBCD Score
                 JSRDisplayBCD HighScore
-                jsr IncTotalPieces
+                jsr IncTotalPieces              ; increment total piece count
                 JSRDisplayBCD TotalPieces
                 ldx LinesCount
                 beq endRound                    ; no, go get next piece
+                jsr CheckLevel                  ; go check level
+                JSRDisplayBCD Level             ; refresh level and total lines display
+                JSRDisplayBCD TotalLines
                 jsr DrawField                   ; yes, draw and sleep for animation
                 ldx #SleepTime
 loopSleep       jsr Sleep
@@ -88,8 +97,6 @@ loopSleep       jsr Sleep
                 jsr RemoveLines                 ; animation displayed, remove the lines from the field
                 ldx #1
                 stx FlagRefreshScr
-                jsr CheckLevel                  ; go check level
-                JSRDisplayBCD Level
 endRound        jmp startRound
 GameOver        JSRDisplayStr NewGameL
 askNewGameLoop  lda KYBD                        ; poll keyboard
@@ -173,17 +180,22 @@ endPKey         rts
 ***
 ***TODO check if substract < 0
 CheckLevel      ldx LinesCount
-                sed                             ; decimal mode
+clLoop0         sed                             ; decimal mode
                 clc
-clLoop0         lda LevelLinesBCD
+                lda TotalLinesBCD+1             ; increment total lines counter
                 adc #1
+                sta TotalLinesBCD+1
+                lda TotalLinesBCD
+                adc #0
+                sta TotalLinesBCD
+                lda TotalLinesBCD+1             ; check the low byte ends with 0
                 and #$0f
-                bne clSvCounter
-                lda LevelBCD                    ; we have to do it in A, inc does not support bcd
+                bne clSvCounter                 ; not a divider of 10, loop
+                lda LevelBCD                    ; increment level
                 clc
                 adc #1
                 sta LevelBCD
-                cld                             ; clear decimal, speed is binary
+                cld                             ; clear decimal, speed limit is binary
                 sec                             ; set carry for substraction
                 lda SpeedLimit+1                ; speed lo byte
                 sbc #$30                        ; substract $30
@@ -191,10 +203,7 @@ clLoop0         lda LevelLinesBCD
                 lda SpeedLimit                  ; speed hi byte
                 sbc #0
                 sta SpeedLimit
-                sed
-                lda #0                          ; reset counter
-clSvCounter     sta LevelLinesBCD
-                dex
+clSvCounter     dex
                 bne clLoop0
                 cld                             ; binary mode
                 rts
@@ -421,20 +430,6 @@ rlEnd           lda PTR_Field+1
                 rts
 *
 *
-Title           dfb $93,$05,16
-                DO ]USE_EXT_CHAR
-                asc "S P E T R // S !"
-                ELSE
-                asc "S P E T R ][ S !"
-                FIN
-LevelL          dfb $90,$07,6
-                asc "Level:"
-PausedL         dfb $de,$06,11
-                asc "P A U S E D"
-NewGameL        dfb $dd,$06,13
-                asc "New Game? Y/N"
-PausedBlankL    dfb $de,$06,11
-                asc "           "
 SpeedCount      dfb 0,0
 SpeedLimit      dfb 0,0
 LinesCount      dfb 0
@@ -444,7 +439,8 @@ FlagFalling     dfb 0
 FlagQuitGame    dfb 0
 Level           dfb $a3,$07,$01
 LevelBCD        dfb $00
-LevelLinesBCD   dfb $00
+TotalLines      dfb $c9,$04,$02
+TotalLinesBCD   dfb $00,$00
 PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd
 ***
 *** zero page pointers
