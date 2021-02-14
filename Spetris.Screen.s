@@ -26,11 +26,7 @@ SSP_X           dfb 0 ; to rename X tmp TODO
 ***
 ***
 Title           dfb $93,$05,16
-                DO ]USE_EXT_CHAR
-                asc "S P E T R // S !"
-                ELSE
                 asc "S P E T R ][ S !"
-                FIN
 HighScoreL      dfb $90,$06,11
                 asc "High Score:"
 ScoreL          dfb $10,$07,6

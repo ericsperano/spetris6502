@@ -73,4 +73,6 @@ KeyUpArrow      equ $8b
 KeyDownArrow    equ $8a
 KeySpace        equ $a0
 KeyEscape       equ $9b
+Key1            equ "1"
+Key2            equ "2"
 KeyP            equ "p"

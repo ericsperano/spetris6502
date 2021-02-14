@@ -17,6 +17,7 @@
                 use macro/InitRandom.Macs
                 use macro/JSRDisplayBCD.Macs
                 use macro/JSRDisplayStr.Macs
+                jsr MenuCharset                 ; ask which charset to use
                 jsr SplashScreen                ; display screen and wait for a key press
                 InitRandom                      ; generate some random numbers
                 InitPtr PointsTable;PTR_Points  ; init constant zero page pointers

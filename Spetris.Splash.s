@@ -1,4 +1,27 @@
 ***
+*** Display a menu asking which charset to use
+*** Set FlagMouseText to 1 if user choose MouseText
+***
+MenuCharset     jsr HOME
+                JSRDisplayStr Splash00
+                JSRDisplayStr MenuCSTitle
+                JSRDisplayStr MenuMouseText
+                JSRDisplayStr MenuRegular
+mcKeyLoop       lda KYBD                        ; poll keyboard
+                cmp #$80                        ; key pressed?
+                bcc mcKeyLoop                   ; no, keep polling
+                sta STROBE                      ; key pressed
+                cmp #Key1                       ; key 1 pressed?
+                bne mcCmpKey2                   ; no, check key 2
+                lda #1
+                sta FlagMouseText               ; yes, use mousetext
+                rts
+mcCmpKey2       cmp #Key2                       ; key 2 pressed?
+                bne mcKeyLoop                   ; no, loop
+                lda #0
+                sta FlagMouseText               ; use regular ASCII charset
+                rts
+***
 *** Display the splash screen and wait for any key to be pressed
 *** It increments the random seed while it waits for a key
 ***
@@ -35,14 +58,20 @@ splashLoop0     clc                             ; increment the 32bit seed
                 bcc splashLoop0                 ; no, loop
                 sta STROBE
                 rts
-                * splash screen strings
-                DO ]USE_EXT_CHAR
-Splash00        dfb $8b,$04,16
-                asc "S P E T R // S !"
-                ELSE
+***
+*** Charset Menu strings
+***
+MenuCSTitle     dfb $87,$05,22
+                asc "By Eric Sperano (2021)"
+MenuMouseText   dfb $a8,$05,35
+                asc "Press 1 to use MouseText characters"
+MenuRegular     dfb $a8,$07,39
+                asc "Press 2 to use regular ASCII characters"
+***
+*** Splash Screen strings
+***
 Splash00        dfb $8b,$04,16
                 asc "S P E T R ][ S !"
-                FIN
                 DO ]USE_EXT_CHAR
 Splash01        dfb $86,$05,25
                 asc "For "
