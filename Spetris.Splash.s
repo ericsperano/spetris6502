@@ -77,47 +77,47 @@ MenuRegular     dfb $a8,$07,39
 ***
 Splash00        dfb $8b,$04,16
                 asc "S P E T R ][ S !"
-Splash01MT      dfb $86,$05,24
+Splash01MT      dfb $87,$05,24
                 asc "For "
                 dfb $40
                 asc " Apple ][ Computers"
-Splash01Reg     dfb $87,$05,22
+Splash01Reg     dfb $88,$05,22
                 asc "For Apple ][ Computers"
 Splash02        dfb $30,$04,22
                 asc "Keyboard Game Controls"
-Splash03        dfb $30,$05,19
+Splash03        dfb $2f,$05,20
                 DO ]USE_EXT_CHAR
                 dfb $4b
                 ELSE
                 dfb "Z"
                 FIN
-                asc "      Rotate Piece"
-Splash04        dfb $b0,$05,22
+                asc " or A  Rotate Piece"
+Splash04        dfb $af,$05,23
                 DO ]USE_EXT_CHAR
                 dfb $48
                 ELSE
                 dfb "N"
                 FIN
-                asc "      Move Piece Left"
-Splash05        dfb $30,$06,23
+                asc "       Move Piece Left"
+Splash05        dfb $2f,$06,24
                 DO ]USE_EXT_CHAR
                 dfb $55
                 ELSE
                 dfb "M"
                 FIN
-                asc "      Move Piece Right"
-Splash06        dfb $b0,$06,22
+                asc "       Move Piece Right"
+Splash06        dfb $af,$06,23
                 DO ]USE_EXT_CHAR
                 dfb $4a
                 ELSE
                 dfb "X"
                 FIN
-                asc "      Move Piece Down"
-Splash07        dfb $30,$07,17
-                asc "Space  Drop Piece"
-Splash08        dfb $b0,$07,17
-                asc "P      Pause Game"
-Splash09        dfb $58,$04,16
-                asc "Esc    Quit Game"
+                asc " or Z  Move Piece Down"
+Splash07        dfb $2f,$07,18
+                asc "Space   Drop Piece"
+Splash08        dfb $af,$07,18
+                asc "P       Pause Game"
+Splash09        dfb $57,$04,17
+                asc "Esc     Quit Game"
 Splash10        dfb $d8,$06,22
                 asc "Press Any Key To Start"
