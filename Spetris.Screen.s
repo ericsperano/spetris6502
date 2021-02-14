@@ -1,4 +1,28 @@
 ***
+*** SetScreenPos
+*** Set PTR_ScreenPos with register x,y
+***
+SetScreenPos    phy
+                phx
+                tya
+                asl ; multiply by 2 because each array elem is 2 bytes (an address)
+                tay
+                stx SSP_X
+                InitPtr FieldPositions;PTR_FieldPos
+                clc
+                lda (PTR_FieldPos),y
+                adc SSP_X
+                sta PTR_ScreenPos
+                iny
+                lda (PTR_FieldPos),y
+                *adc #0   ; negative numbers set the carry bit
+                sta PTR_ScreenPos+1
+                plx
+                ply
+                rts
+*
+SSP_X           dfb 0 ; to rename X tmp TODO
+***
 ***
 ***
 Title           dfb $93,$05,16

@@ -160,6 +160,17 @@ InitTryPieces   pha                             ; save a
 ***
 ***
 ***
+ChTransparent   equ '.'
+                DO ]USE_EXT_CHAR
+ChTile          equ $7f
+ChLines         equ $ff
+                ELSE
+ChTile          equ "#"
+ChLines         equ '-'
+                FIN
+***
+***
+***
 PieceLen        equ 16
 PieceStructLen  equ 4*PieceLen                  ; 4 different rotations
 Pieces          asc '..X...X...X...X.'          ; rotation 0 piece 0

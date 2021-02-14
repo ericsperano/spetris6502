@@ -51,3 +51,4 @@ HighScore       dfb $9d,$06,$04
 HighScoreBCD    dfb $00,$00,$00,$00 ; bcd encoded
 Score           dfb $1d,$07,$04
 ScoreBCD        dfb $00,$00,$00,$00 ; bcd encoded
+PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd

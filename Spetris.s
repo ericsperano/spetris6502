@@ -8,6 +8,8 @@
                 put Spetris.BCD
                 put Spetris.Str
                 put Spetris.Random
+                put Spetris.Keyboard
+                put Spetris.Level
                 put Spetris.Piece
                 put Spetris.Field
                 put Spetris.Score
