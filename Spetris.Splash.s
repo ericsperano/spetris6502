@@ -3,6 +3,7 @@
 *** Set FlagMouseText to 1 if user choose MouseText
 ***
 MenuCharset     jsr HOME
+                sta ALTCHARSETOFF
                 JSRDisplayStr Splash00
                 JSRDisplayStr MenuCSTitle
                 JSRDisplayStr MenuMouseText
@@ -26,12 +27,16 @@ mcCmpKey2       cmp #Key2                       ; key 2 pressed?
 *** It increments the random seed while it waits for a key
 ***
 SplashScreen    jsr HOME                        ; clear screen
-                DO ]USE_EXT_CHAR
+                lda FlagMouseText               ; mouse text selected?
+                beq splashDisplay               ; no, skip enabling
                 sta ALTCHARSETON                ; enable alt charset
-                FIN
-                JSRDisplayStr Splash00
-                JSRDisplayStr Splash01
-                JSRDisplayStr Splash02
+splashDisplay   JSRDisplayStr Splash00
+                lda FlagMouseText               ; mouse text selected?
+                beq splashDispReg               ; no, display regular ascii strings
+                JSRDisplayStr Splash01MT        ; display mouse text strings
+                jmp splashDispRest
+splashDispReg   JSRDisplayStr Splash01Reg       ; display regular ascii strings
+splashDispRest  JSRDisplayStr Splash02          ; display rest of the streings
                 JSRDisplayStr Splash03
                 JSRDisplayStr Splash04
                 JSRDisplayStr Splash05
@@ -72,15 +77,12 @@ MenuRegular     dfb $a8,$07,39
 ***
 Splash00        dfb $8b,$04,16
                 asc "S P E T R ][ S !"
-                DO ]USE_EXT_CHAR
-Splash01        dfb $86,$05,25
+Splash01MT      dfb $86,$05,24
                 asc "For "
                 dfb $40
-                asc " Apple //e Computers"
-                ELSE
-Splash01        dfb $87,$05,22
-                asc "By Eric Sperano (2021)"
-                FIN
+                asc " Apple ][ Computers"
+Splash01Reg     dfb $87,$05,22
+                asc "For Apple ][ Computers"
 Splash02        dfb $30,$04,22
                 asc "Keyboard Game Controls"
 Splash03        dfb $30,$05,19

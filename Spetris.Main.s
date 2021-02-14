@@ -10,6 +10,7 @@
 *** TODO confirm quit on escape key
 *** TODO make it work in DOS 3.3
 *** TODO cc65 instead of merlin
+*** TODO last piece does not always show correctly?
 ***
                 use macro/IncSpeedCount.Macs
                 use macro/InitGame.Macs
@@ -139,4 +140,4 @@ KYBD            equ $c000
 STROBE          equ $c010
 HOME            equ $fc58
 ALTCHARSETON    equ $c00f
-*ALTCHARSETOFF   equ $c00e
+ALTCHARSETOFF   equ $c00e
