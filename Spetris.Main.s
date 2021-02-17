@@ -1,16 +1,17 @@
 ***
 *** SPETRIS FOR THE APPLE II COMPUTER
+***
 *** BUG  New Piece does not always show up
 *** BUG  Last piece does not always show correctly?
-*** BUG Splash Screen using regular charset
+***
 *** TODO No phx,plx,phy,ply, etc on old Apple II
 *** TODO Blinking game over
-*** TODO Alternate keys ((pac man uses LEFT/RIGHT arrows and A & Z keys.)
 *** TODO confirm quit on escape key
 *** TODO make it work in DOS 3.3
 *** TODO Sound
 *** TODO use an array of structs for charsets
 *** TODO Blinking Paused
+*** TODO Blinking Press Any Key in splash screen
 ***
 *** NTH  cc65 instead of merlin
                 use macro/IncSpeedCount.Macs

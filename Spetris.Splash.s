@@ -5,7 +5,8 @@
 MenuCharset     jsr HOME
                 sta ALTCHARSETOFF
                 JSRDisplayStr Splash00
-                JSRDisplayStr MenuCSTitle
+                JSRDisplayStr Splash00b
+                JSRDisplayStr Splash01Reg
                 JSRDisplayStr MenuMouseText
                 JSRDisplayStr MenuRegular
 mcKeyLoop       lda KYBD                        ; poll keyboard
@@ -30,23 +31,31 @@ mcCmpKey2       cmp #Key2                       ; key 2 pressed?
 ***
 SplashScreen    jsr HOME                        ; clear screen
                 lda FlagMouseText               ; mouse text selected?
-                beq splashDisplay               ; no, skip enabling
+                beq splashDispReg               ; no, skip enabling
                 sta ALTCHARSETON                ; enable alt charset
-splashDisplay   JSRDisplayStr Splash00
-                lda FlagMouseText               ; mouse text selected?
-                beq splashDispReg               ; no, display regular ascii strings
-                JSRDisplayStr Splash01MT        ; display mouse text strings
+splashDisplay   JSRDisplayStr Splash01MT        ; display mouse text strings
+                JSRDisplayStr Splash03MT
+                JSRDisplayStr Splash04MT
+                JSRDisplayStr Splash05MT
+                JSRDisplayStr Splash06MT
+                JSRDisplayStr Splash07MT
+                JSRDisplayStr Splash08MT
+                JSRDisplayStr Splash09MT
+                JSRDisplayStr Splash10MT
                 jmp splashDispRest
 splashDispReg   JSRDisplayStr Splash01Reg       ; display regular ascii strings
-splashDispRest  JSRDisplayStr Splash02          ; display rest of the streings
-                JSRDisplayStr Splash03
-                JSRDisplayStr Splash04
-                JSRDisplayStr Splash05
-                JSRDisplayStr Splash06
-                JSRDisplayStr Splash07
-                JSRDisplayStr Splash08
-                JSRDisplayStr Splash09
-                JSRDisplayStr Splash10
+                JSRDisplayStr Splash03Reg
+                JSRDisplayStr Splash04Reg
+                JSRDisplayStr Splash05Reg
+                JSRDisplayStr Splash06Reg
+                JSRDisplayStr Splash07Reg
+                JSRDisplayStr Splash08Reg
+                JSRDisplayStr Splash09Reg
+                JSRDisplayStr Splash10Reg
+splashDispRest  JSRDisplayStr Splash00          ; display rest of the strings
+                JSRDisplayStr Splash00b
+                JSRDisplayStr Splash02
+                JSRDisplayStr Splash11
 splashLoop0     clc                             ; increment the 32bit seed
                 lda Rand
                 adc #1
@@ -68,8 +77,6 @@ splashLoop0     clc                             ; increment the 32bit seed
 ***
 *** Charset Menu strings
 ***
-MenuCSTitle     dfb $87,$05,22
-                asc "By Eric Sperano (2021)"
 MenuMouseText   dfb $a8,$05,35
                 asc "Press 1 to use MouseText characters"
 MenuRegular     dfb $a8,$07,39
@@ -79,47 +86,51 @@ MenuRegular     dfb $a8,$07,39
 ***
 Splash00        dfb $8b,$04,16
                 asc "S P E T R ][ S !"
-Splash01MT      dfb $87,$05,24
+Splash01MT      dfb $87,$06,24
                 asc "For "
                 dfb $40
                 asc " Apple ][ Computers"
-Splash01Reg     dfb $88,$05,22
+Splash03MT      dfb $2f,$05,20
+                dfb $4b
+                asc " or A  Rotate Piece"
+Splash04MT      dfb $af,$05,23
+                dfb $48
+                asc "       Move Piece Left"
+Splash05MT      dfb $2f,$06,24
+                dfb $55
+                asc "       Move Piece Right"
+Splash06MT      dfb $af,$06,23
+                dfb $4a
+                asc " or Z  Move Piece Down"
+Splash07MT      dfb $2f,$07,18
+                asc "Space   Drop Piece"
+Splash08MT      dfb $af,$07,18
+                asc "P       Pause Game"
+Splash09MT      dfb $57,$04,20
+                asc "1       Change Style!"
+Splash10MT      dfb $D7,$04,17
+                asc "Esc     Quit Game"
+Splash01Reg     dfb $88,$06,22
                 asc "For Apple ][ Computers"
+Splash03Reg     dfb $2a,$05,30
+                asc "Up Arrow or A     Rotate Piece"
+Splash04Reg     dfb $aa,$05,33
+                asc "Left Arrow        Move Piece Left"
+Splash05Reg     dfb $2a,$06,34
+                asc "Right Arrow       Move Piece Right"
+Splash06Reg     dfb $aa,$06,33
+                asc "Down Arrow or Z   Move Piece Down"
+Splash07Reg     dfb $2a,$07,28
+                asc "Space             Drop Piece"
+Splash08Reg     dfb $aa,$07,28
+                asc "P                 Pause Game"
+Splash09Reg     dfb $52,$04,30
+                asc "1                 Change Style!"
+Splash10Reg     dfb $d2,$04,27
+                asc "Esc               Quit Game"
+Splash00b       dfb $88,$05,22
+                asc "By Eric Sperano (2021)"
 Splash02        dfb $30,$04,22
                 asc "Keyboard Game Controls"
-Splash03        dfb $2f,$05,20
-                DO ]USE_EXT_CHAR
-                dfb $4b
-                ELSE
-                dfb "Z"
-                FIN
-                asc " or A  Rotate Piece"
-Splash04        dfb $af,$05,23
-                DO ]USE_EXT_CHAR
-                dfb $48
-                ELSE
-                dfb "N"
-                FIN
-                asc "       Move Piece Left"
-Splash05        dfb $2f,$06,24
-                DO ]USE_EXT_CHAR
-                dfb $55
-                ELSE
-                dfb "M"
-                FIN
-                asc "       Move Piece Right"
-Splash06        dfb $af,$06,23
-                DO ]USE_EXT_CHAR
-                dfb $4a
-                ELSE
-                dfb "X"
-                FIN
-                asc " or Z  Move Piece Down"
-Splash07        dfb $2f,$07,18
-                asc "Space   Drop Piece"
-Splash08        dfb $af,$07,18
-                asc "P       Pause Game"
-Splash09        dfb $57,$04,17
-                asc "Esc     Quit Game"
-Splash10        dfb $d8,$06,22
+Splash11        dfb $d8,$06,22
                 asc "Press Any Key To Start"
