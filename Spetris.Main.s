@@ -2,16 +2,15 @@
 *** SPETRIS FOR THE APPLE II COMPUTER
 ***
 *** BUG  New Piece does not always show up
-*** BUG  Last piece does not always show correctly?
 ***
 *** TODO No phx,plx,phy,ply, etc on old Apple II
-*** TODO Blinking game over
 *** TODO confirm quit on escape key
 *** TODO make it work in DOS 3.3
 *** TODO Sound
 *** TODO use an array of structs for charsets
-*** TODO Blinking Paused
-*** TODO Blinking Press Any Key in splash screen
+*** TODO Blinking game over (regular ascii)
+*** TODO Blinking Paused (regular ascii)
+*** TODO Blinking Press Any Key in splash screen (regular ascii)
 ***
 *** NTH  cc65 instead of merlin
                 use macro/IncSpeedCount.Macs
@@ -103,7 +102,8 @@ loopSleep       jsr Sleep
                 ldx #1
                 stx FlagRefreshScr
 endRound        jmp startRound
-GameOver        JSRDisplayStr NewGameL
+GameOver        jsr DrawField
+                JSRDisplayStr NewGameL
 askNewGameLoop  lda KYBD                        ; poll keyboard
                 cmp #$80                        ; key pressed?
                 bcc askNewGameLoop              ; no, keep polling

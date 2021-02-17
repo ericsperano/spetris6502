@@ -91,12 +91,12 @@ test1Key        cmp #Key1
 testMTChSet1    cpx #1
                 bne testMTChSet2
                 inx
-                jsr UseRegCharset
+                jsr UseMT3Charset
                 jmp convField
 testMTChSet2    cpx #2
                 bne testMTChSet3
                 inx
-                jsr UseReg2Charset
+                jsr UseMT4Charset
                 jmp convField
 testMTChSet3    ldx #0
                 jsr UseMTCharset

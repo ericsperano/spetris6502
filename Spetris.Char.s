@@ -50,6 +50,32 @@ UseMT2Charset   UseCharset MT2
 ***
 ***
 ***
+MT3ChTile       equ $40
+MT3ChLines      equ $41
+MT3ChLB         equ $5a
+MT3ChRB         equ $5f
+MT3ChLC         equ " "
+MT3ChRC         equ " "
+MT3ChBB         equ $4c
+MT3ChBG         equ " "
+UseMT3Charset   UseCharset MT3
+                rts
+***
+***
+***
+MT4ChTile       equ $56
+MT4ChLines      equ $5d
+MT4ChLB         equ $5a
+MT4ChRB         equ $5f
+MT4ChLC         equ " "
+MT4ChRC         equ " "
+MT4ChBB         equ $4c
+MT4ChBG         equ " "
+UseMT4Charset   UseCharset MT4
+                rts
+***
+***
+***
 UseRegCharset   UseCharset Reg
                 rts
 RegChTile       equ '#'
