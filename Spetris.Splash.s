@@ -16,11 +16,13 @@ mcKeyLoop       lda KYBD                        ; poll keyboard
                 bne mcCmpKey2                   ; no, check key 2
                 lda #1
                 sta FlagMouseText               ; yes, use mousetext
+                jsr UseMTCharset
                 rts
 mcCmpKey2       cmp #Key2                       ; key 2 pressed?
                 bne mcKeyLoop                   ; no, loop
                 lda #0
                 sta FlagMouseText               ; use regular ASCII charset
+                jsr UseRegCharset
                 rts
 ***
 *** Display the splash screen and wait for any key to be pressed

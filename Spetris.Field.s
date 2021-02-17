@@ -30,19 +30,19 @@ SFP_End         lda PTR_Field
 InitField       ldx #0
                 lda #16                         ; TODO FieldRows - 1
                 pha                             ; save rows counter on stack
-ifLoop0         lda #" "                        ; col 0 is space
+ifLoop0         lda #" "                        ; col 0 is always space (Not CharBG)
                 sta Field,x
                 inx
-                lda #LB                         ; col 1 is left bar
+                lda CharLB                     ; col 1 is left bar
                 sta Field,x
                 inx
                 ldy #10                         ; TODO FieldCols - 4
-                lda #BG
+                lda CharBG
 ifLoop1         sta Field,x                     ; BG for col 2 to 11
                 inx
                 dey
                 bne ifLoop1
-                lda #RB                         ; col 12 is right bar
+                lda CharRB                      ; col 12 is right bar
                 sta Field,x
                 inx
                 lda #" "                        ; col 13 is space
@@ -56,22 +56,68 @@ ifLoop1         sta Field,x                     ; BG for col 2 to 11
                 lda #" "                        ; last line, col 0 is space
                 sta Field,x
                 inx
-                lda #LC                         ; left corner
+                lda CharLC                      ; left corner
                 sta Field,x
                 inx
                 ldy #10                         ; TODO FieldCols - 4
-                lda #BB                         ; bottom bar for cols 2 to 11
+                lda CharBB                      ; bottom bar for cols 2 to 11
 ifLoop2         sta Field,x
                 inx
                 dey
                 bne ifLoop2
-                lda #RC                         ; right corner
+                lda CharRC                      ; right corner
                 sta Field,x
                 inx
-                lda #" "                        ; space
+                lda #" "                        ; always space (not CharBG)
                 sta Field,x
                 pla
                 rts
+***
+***
+***
+ConvertField    ldx #0
+                lda #16                         ; TODO FieldRows - 1
+                pha                             ; save rows counter on stack
+cfLoop0         inx
+                lda CharLB                      ; col 1 is left bar
+                sta Field,x
+                inx
+                ldy #10                         ; TODO FieldCols - 4
+cfLoop1         lda Field,x
+                cmp OldCharBG
+                bne cfSetTile
+                lda CharBG
+                sta Field,x
+                jmp cfNext1
+cfSetTile       lda CharTile
+                sta Field,x
+cfNext1         inx
+                dey
+                bne cfLoop1
+                lda CharRB                      ; col 12 is right bar
+                sta Field,x
+                inx
+                inx
+                pla                             ; check current rows counter from stack
+                sec
+                sbc #1                          ; decrement
+                pha                             ; put back on stack
+                bne cfLoop0                     ; loop if more rows
+                inx                             ; skip space
+                lda CharLC                      ; left corner
+                sta Field,x
+                inx
+                ldy #10                         ; TODO FieldCols - 4
+                lda CharBB                      ; bottom bar for cols 2 to 11
+cfLoop2         sta Field,x
+                inx
+                dey
+                bne cfLoop2
+                lda CharRC                      ; right corner
+                sta Field,x
+                pla
+                rts
+
 ***
 ***  DoesPieceFit
 ***
@@ -91,7 +137,7 @@ dpfLoop0        lda (PTR_Piece),y
                 beq dpfNextCh
                 * pixel is on, need to check if it's empty in the field
                 lda (PTR_Field),y
-                cmp #BG
+                cmp CharBG
                 beq dpfNextCh
                 clc                             ; clear carry and return, does not fit
                 rts
@@ -133,7 +179,7 @@ lpLoop0         lda (PTR_Piece),y
                 cmp #'.'
                 beq lpNextCh
                 * pixel is on, lock it on field
-                lda #ChTile
+                lda CharTile
                 sta (PTR_Field),y
 lpNextCh        iny
                 cpy #4
@@ -168,14 +214,14 @@ CheckForLines   lda #0
                 ldx #16
 cflCheckRow     ldy #2                          ; start at pos 2 in the row
 cflLoop0        lda (PTR_Field),y
-                cmp #BG                         ; is it a space? TODO constant
+                cmp CharBG                      ; is it the background?
                 beq cflNextRow                  ; yeah so not a line, look next row
                 iny                             ; no, keep looking previous char on row
                 cpy #12                         ; loop if we haven't reach the right side
                 bcc cflLoop0
                 inc LinesCount
                 ldy #2                          ; mark the line in the field for display
-                lda #ChLines                    ; by using the line char
+                lda CharLines                   ; by using the line char
 cflLoop1        sta (PTR_Field),y
                 iny
                 cpy #12                         ; loop if we haven't reach the right side
@@ -200,7 +246,7 @@ RemoveLines     lda #<FieldBottom               ; start from the bottom
                 sta PTR_Field+1                 ; save hi byte
 rlLoop0         ldy #2                          ; start at pos 2 in the row
                 lda (PTR_Field),y
-                cmp #ChLines                    ; is third char a line indicator?
+                cmp CharLines                   ; is third char a line indicator?
                 bne rlUp                        ; no, skip
                 * move rows
                 lda PTR_Field+1                 ; copy current pointer hi byte to tmp1
@@ -294,21 +340,6 @@ FieldRows       equ 17
 Field           ds  210, 0    ; FieldCols * (FieldRows - 2)  2 because of the following 2
 FieldBottom     ds  28, 0     ; last line ptr so FieldCols + another FieldCols for bottom bar
 * total field size is 14*17=238 so we can use an 8bit index
-                DO ]USE_EXT_CHAR
-LB              equ $5a
-RB              equ $5f
-LC              equ " "
-RC              equ " "
-BB              equ $4c
-BG              equ " "
-                ELSE
-LB              equ " "
-RB              equ " "
-LC              equ " "
-RC              equ " "
-BB              equ " "
-BG              equ ' '
-                FIN
 FieldPositions  dfb $80,$05
                 dfb $00,$06
                 dfb $80,$06

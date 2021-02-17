@@ -15,6 +15,7 @@ InitGame        MAC
                 sta TotalPiecesBCD
                 sta TotalPiecesBCD+1
                 sta TotalPiecesBCD+2
+                sta CurrCharset
                 sta SpeedLimit+1
                 lda #02
                 sta SpeedLimit

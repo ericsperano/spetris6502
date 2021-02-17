@@ -1,17 +1,18 @@
 ***
 *** SPETRIS FOR THE APPLE II COMPUTER
-*** TODO ! DO NOT USE PHX/PHY ETC  ON OLD APPLE II
-*** TODO New Piece does not always show up
-*** TODO blinking game over
-*** TODO keyboard has to work with lowercase/uppercase  (pac man uses LEFT/RIGHT arrows and A & Z keys.)
-*** TODO alternate keys (no arrow keys)
-*** TODO select mouse text or not
-*** TODO regular/reverse screen
+*** BUG  New Piece does not always show up
+*** BUG  Last piece does not always show correctly?
+*** BUG Splash Screen using regular charset
+*** TODO No phx,plx,phy,ply, etc on old Apple II
+*** TODO Blinking game over
+*** TODO Alternate keys ((pac man uses LEFT/RIGHT arrows and A & Z keys.)
 *** TODO confirm quit on escape key
 *** TODO make it work in DOS 3.3
-*** TODO cc65 instead of merlin
-*** TODO last piece does not always show correctly?
+*** TODO Sound
+*** TODO use an array of structs for charsets
+*** TODO Blinking Paused
 ***
+*** NTH  cc65 instead of merlin
                 use macro/IncSpeedCount.Macs
                 use macro/InitGame.Macs
                 use macro/InitPtr.Macs
@@ -96,7 +97,7 @@ roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 ldx #SleepTime
 loopSleep       jsr Sleep
                 dex
-                bne loopSlee                    p
+                bne loopSleep
                 jsr RemoveLines                 ; animation displayed, remove the lines from the field
                 ldx #1
                 stx FlagRefreshScr

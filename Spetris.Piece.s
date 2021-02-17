@@ -52,7 +52,7 @@ dpLoop1         ldy drawPieceY
 dploop0         lda (PTR_Piece),y
                 cmp #ChTransparent
                 beq dpNextCh
-                lda #ChTile
+                lda CharTile
                 sta (PTR_ScreenPos),y
 dpNextCh        iny
                 cpy #4  ; 4 cols
@@ -79,7 +79,7 @@ DrawNextPiece   lda #0 ; default rotation
                 jsr SetPtrPiece
                 ldx #4 ; 4 rows
                 stx drawPieceRows
-                ldy #11 ; first line is 10
+                ldy #12 ; first line is 12
                 sty drawPieceY
 dnpLoop1        ldy drawPieceY
                 ldx #$10
@@ -88,9 +88,9 @@ dnpLoop1        ldy drawPieceY
 dnploop0        lda (PTR_Piece),y
                 cmp #'.'
                 bne dnpSetBrick
-                lda #" " ; TODO constant
+                lda #" "
                 jmp dnpDraw
-dnpSetBrick     lda #ChTile
+dnpSetBrick     lda CharTile
 dnpDraw         sta (PTR_ScreenPos),y
 dnpNextCh       iny
                 cpy #4  ; 4 cols
@@ -161,13 +161,6 @@ InitTryPieces   pha                             ; save a
 ***
 ***
 ChTransparent   equ '.'
-                DO ]USE_EXT_CHAR
-ChTile          equ $7f
-ChLines         equ $ff
-                ELSE
-ChTile          equ "#"
-ChLines         equ '-'
-                FIN
 ***
 ***
 ***

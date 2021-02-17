@@ -7,6 +7,7 @@
                 put Spetris.Main
                 put Spetris.BCD
                 put Spetris.Str
+                put Spetris.Char
                 put Spetris.Random
                 put Spetris.Keyboard
                 put Spetris.Level
