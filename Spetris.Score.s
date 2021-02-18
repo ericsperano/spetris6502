@@ -1,9 +1,9 @@
-***
-*** Increment the score
-*** Formula is  ((1 << lines) * 100) + 25
-*** We cheat by indexing a pre-calcultated points table
-***
-IncScore        lda LinesCount                  ; y will be the index for the points table
+;***
+;*** Increment the score
+;*** Formula is  ((1 << lines) * 100) + 25
+;*** We cheat by indexing a pre-calcultated points table
+;***
+IncScore:       lda LinesCount                  ; y will be the index for the points table
                 asl                             ; multiply linescount by 2 because each entry is 2 bytes
                 tay
                 iny                             ; lo byte is in +1
@@ -27,28 +27,28 @@ IncScore        lda LinesCount                  ; y will be the index for the po
                 adc #0
                 sta ScoreBCD,x
                 cld                             ; binary mode
-                * 32 bits comparisons of Score and HighScore
+                ; 32 bits comparisons of Score and HighScore
                 ldx #0                          ; compare hihghest byte first
-isCmpLoop       lda ScoreBCD,x
+isCmpLoop:      lda ScoreBCD,x
                 cmp HighScoreBCD,x
                 beq isNextByte                  ; same value, compare next character
                 bcs isUpdScoreLoop              ; acuumulator > memory (score byte > high score)
                 bcc isEndCmp                    ; accumulator < memory (score byte < high score)
-isNextByte      inx
+isNextByte:     inx
                 cpx #4                          ; end of BCD number? TODO constant
                 bne isCmpLoop                   ; keep comparing
-isEndCmp        rts                             ; no need to update high score, return
-isUpdScoreLoop  lda ScoreBCD,x
+isEndCmp:       rts                             ; no need to update high score, return
+isUpdScoreLoop: lda ScoreBCD,x
                 sta HighScoreBCD,x
                 inx
                 cpx #4
                 bne isUpdScoreLoop
                 rts
-***
-***
-***
-HighScore       dfb $9d,$06,$04
-HighScoreBCD    dfb $00,$00,$00,$00 ; bcd encoded
-Score           dfb $1d,$07,$04
-ScoreBCD        dfb $00,$00,$00,$00 ; bcd encoded
-PointsTable     dfb $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd
+;***
+;***
+;***
+HighScore:      .byte $9d,$06,$04
+HighScoreBCD:   .byte $00,$00,$00,$00 ; bcd encoded
+Score:          .byte $1d,$07,$04
+ScoreBCD:       .byte $00,$00,$00,$00 ; bcd encoded
+PointsTable:    .byte $00,$25,$02,$25,$04,$25,$08,$25,$16,$25 ; points for 0 to 4 lines, 2 bytes bcd

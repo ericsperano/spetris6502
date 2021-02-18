@@ -1,10 +1,10 @@
-***
-*** Sleep
-***
-Sleep           phx
+;***
+;*** Sleep
+;***
+Sleep:          phx
                 ldx #SleepTime
-sleepLoop       dex
-                bne sleepLoop
+@loop:          dex
+                bne @loop
                 plx
                 rts
-SleepTime       equ $ff
+SleepTime       = $ff

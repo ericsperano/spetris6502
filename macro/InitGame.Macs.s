@@ -1,7 +1,7 @@
-***
-***
-***
-InitGame        MAC
+;***
+;***
+;***
+.macro          InitGame
                 lda #0
                 sta FlagQuitGame
                 sta SpeedCount+1
@@ -21,4 +21,4 @@ InitGame        MAC
                 lda #1
                 sta FlagRefreshScr
                 sta LevelBCD
-                <<<
+.endmacro

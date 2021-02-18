@@ -1,7 +1,7 @@
-*** InitPtr <Address> <ZP pointer>
-InitPtr         MAC
-                lda #<]1        ; lo byte
-                sta ]2
-                lda #>]1        ; hi byte
-                sta ]2+1
-                <<<
+;*** InitPtr <Address> <ZP pointer>
+.macro          InitPtr addr, ptr
+                lda #<addr        ; lo byte
+                sta ptr
+                lda #>addr        ; hi byte
+                sta ptr+1
+.endmacro

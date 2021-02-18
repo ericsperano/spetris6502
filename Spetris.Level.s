@@ -1,8 +1,8 @@
-***
-***
-***TODO check if substract < 0
-CheckLevel      ldx LinesCount
-clLoop0         sed                             ; decimal mode
+;***
+;***
+;***TODO check if substract < 0
+CheckLevel:     ldx LinesCount
+clLoop0:        sed                             ; decimal mode
                 clc
                 lda TotalLinesBCD+1             ; increment total lines counter
                 adc #1
@@ -25,16 +25,16 @@ clLoop0         sed                             ; decimal mode
                 lda SpeedLimit                  ; speed hi byte
                 sbc #0
                 sta SpeedLimit
-clSvCounter     dex
+clSvCounter:    dex
                 bne clLoop0
                 cld                             ; binary mode
                 rts
-***
-***
-***
-Level           dfb $a3,$07,$01
-LevelBCD        dfb $00
-TotalLines      dfb $c9,$04,$02
-TotalLinesBCD   dfb $00,$00
-SpeedCount      dfb 0,0
-SpeedLimit      dfb 0,0
+;***
+;***
+;***
+Level:          .byte $a3,$07,$01
+LevelBCD:       .byte $00
+TotalLines:     .byte $c9,$04,$02
+TotalLinesBCD:  .byte $00,$00
+SpeedCount:     .byte 0,0
+SpeedLimit:     .byte 0,0

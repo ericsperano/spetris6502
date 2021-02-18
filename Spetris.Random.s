@@ -1,7 +1,7 @@
-***
-*** RandomNumber - Generate a 32 bits random number in Rand1-4
-***
-RandomNumber    ror Rand+3      ; Bit 25 to carry
+;***
+;*** RandomNumber - Generate a 32 bits random number in Rand1-4
+;***
+RandomNumber:   ror Rand+3      ; Bit 25 to carry
                 lda Rand+2      ; Shift left 8 bits
                 sta Rand+3
                 lda Rand+1
@@ -18,7 +18,7 @@ RandomNumber    ror Rand+3      ; Bit 25 to carry
                 ror
                 sta Rand
                 rts
-***
-*** 32 bits random number.
-***
-Rand           dfb 0,0,0,0
+;***
+;*** 32 bits random number.
+;***
+Rand:          .byte 0,0,0,0

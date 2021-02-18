@@ -1,7 +1,7 @@
-***
-*** DisplayStr
-***
-DisplayStr      ldy #$00
+;***
+;*** DisplayStr
+;***
+DisplayStr:     ldy #$00
                 lda (PtrDisplayStr),y           ; lo byte of the screen adress
                 sta PTR_ScreenPos
                 iny
@@ -18,10 +18,10 @@ DisplayStr      ldy #$00
                 adc #$0                         ; will add 1 if the previous add set the carry flag
                 sta PtrDisplayStr+1             ; save hi byte
                 ldy #$00
-dsLoop          lda (PtrDisplayStr),y           ; get char to display
+dsLoop:         lda (PtrDisplayStr),y           ; get char to display
                 sta (PTR_ScreenPos),y           ; copy to screen
                 iny
                 cpy dsStrLen
                 bne dsLoop
                 rts
-dsStrLen        dfb 0                           ; copy of the current string length
+dsStrLen:       .byte 0                         ; copy of the current string length

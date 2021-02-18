@@ -1,19 +1,17 @@
-***
-*** SPETRIS FOR THE APPLE IIe COMPUTER
-***
-*** Compile Flags:
-]USE_EXT_CHAR = 1 ; enable the use of the extended char set
-                org $2000
-                put Spetris.Main
-                put Spetris.BCD
-                put Spetris.Str
-                put Spetris.Char
-                put Spetris.Random
-                put Spetris.Keyboard
-                put Spetris.Level
-                put Spetris.Piece
-                put Spetris.Field
-                put Spetris.Score
-                put Spetris.Screen
-                put Spetris.Sleep
-                put Spetris.Splash
+; ***
+; *** SPETRIS FOR THE APPLE IIe COMPUTER
+; ***
+                .org $2000
+                .include "Spetris.Main.s"
+                .include "Spetris.BCD.s"
+                .include "Spetris.Str.s"
+                .include "Spetris.Char.s"
+                .include "Spetris.Random.s"
+                .include "Spetris.Keyboard.s"
+                .include "Spetris.Level.s"
+                .include "Spetris.Piece.s"
+                .include "Spetris.Field.s"
+                .include "Spetris.Score.s"
+                .include "Spetris.Screen.s"
+                .include "Spetris.Sleep.s"
+                .include "Spetris.Splash.s"

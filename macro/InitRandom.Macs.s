@@ -1,9 +1,9 @@
-***
-*** InitRandom - Generate a few random numbers to kick things off
-***
-InitRandom      MAC
+;***
+;*** InitRandom - Generate a few random numbers to kick things off
+;***
+.macro          InitRandom
                 ldx #$20
-irLoop          jsr RandomNumber
+@loop:          jsr RandomNumber
                 dex
-                bne irLoop
-                <<<
+                bne @loop
+.endmacro

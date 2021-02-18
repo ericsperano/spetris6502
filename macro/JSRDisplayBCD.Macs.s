@@ -1,4 +1,4 @@
-JSRDisplayBCD   MAC
-                InitPtr ]1;PtrDisplayStr
+.macro          JSRDisplayBCD addr
+                InitPtr addr,PtrDisplayStr
                 jsr DisplayBCD
-                <<<
+.endmacro

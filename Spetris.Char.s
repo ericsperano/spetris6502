@@ -1,116 +1,201 @@
-***
-*** TODO move to macro
-***
-UseCharset      MAC
-                lda #]1ChTile
+;***
+;***
+;***
+MTChTile        = $7f
+MTChLines       = $ff
+MTChLB          = $5a
+MTChRB          = $5f
+MTChLC          = ASCII_Space
+MTChRC          = ASCII_Space
+MTChBB          = $4c
+MTChBG          = ASCII_Space
+UseMTCharset:   lda #MTChTile
                 sta CharTile
-                lda #]1ChLines
+                lda #MTChLines
                 sta CharLines
-                lda #]1ChLB
+                lda #MTChLB
                 sta CharLB
-                lda #]1ChRB
+                lda #MTChRB
                 sta CharRB
-                lda #]1ChLC
+                lda #MTChLC
                 sta CharLC
-                lda #]1ChRC
+                lda #MTChRC
                 sta CharRC
-                lda #]1ChBB
+                lda #MTChBB
                 sta CharBB
                 lda CharBG
                 sta OldCharBG
-                lda #]1ChBG
+                lda #MTChBG
                 sta CharBG
-                <<<
-***
-***
-***
-MTChTile        equ $7f
-MTChLines       equ $ff
-MTChLB          equ $5a
-MTChRB          equ $5f
-MTChLC          equ " "
-MTChRC          equ " "
-MTChBB          equ $4c
-MTChBG          equ " "
-UseMTCharset    UseCharset MT
                 rts
-***
-***
-***
-MT2ChTile       equ $ff
-MT2ChLines      equ $7f
-MT2ChLB         equ " "
-MT2ChRB         equ " "
-MT2ChLC         equ " "
-MT2ChRC         equ " "
-MT2ChBB         equ " "
-MT2ChBG         equ ' '
-UseMT2Charset   UseCharset MT2
+;***
+;***
+;***
+MT2ChTile       = $ff
+MT2ChLines      = $7f
+MT2ChLB         = ASCII_Space
+MT2ChRB         = ASCII_Space
+MT2ChLC         = ASCII_Space
+MT2ChRC         = ASCII_Space
+MT2ChBB         = ASCII_Space
+MT2ChBG         = ASCII_Space + $80
+UseMT2Charset:  lda #MT2ChTile
+                sta CharTile
+                lda #MT2ChLines
+                sta CharLines
+                lda #MT2ChLB
+                sta CharLB
+                lda #MT2ChRB
+                sta CharRB
+                lda #MT2ChLC
+                sta CharLC
+                lda #MT2ChRC
+                sta CharRC
+                lda #MT2ChBB
+                sta CharBB
+                lda CharBG
+                sta OldCharBG
+                lda #MT2ChBG
+                sta CharBG
                 rts
-***
-***
-***
-MT3ChTile       equ $40
-MT3ChLines      equ $41
-MT3ChLB         equ $5a
-MT3ChRB         equ $5f
-MT3ChLC         equ " "
-MT3ChRC         equ " "
-MT3ChBB         equ $4c
-MT3ChBG         equ " "
-UseMT3Charset   UseCharset MT3
+;***
+;***
+;***
+MT3ChTile       = $40
+MT3ChLines      = $41
+MT3ChLB         = $5a
+MT3ChRB         = $5f
+MT3ChLC         = ASCII_Space
+MT3ChRC         = ASCII_Space
+MT3ChBB         = $4c
+MT3ChBG         = ASCII_Space
+UseMT3Charset:  lda #MT3ChTile
+                sta CharTile
+                lda #MT3ChLines
+                sta CharLines
+                lda #MT3ChLB
+                sta CharLB
+                lda #MT3ChRB
+                sta CharRB
+                lda #MT3ChLC
+                sta CharLC
+                lda #MT3ChRC
+                sta CharRC
+                lda #MT3ChBB
+                sta CharBB
+                lda CharBG
+                sta OldCharBG
+                lda #MT3ChBG
+                sta CharBG
                 rts
-***
-***
-***
-MT4ChTile       equ $56
-MT4ChLines      equ $5d
-MT4ChLB         equ $5a
-MT4ChRB         equ $5f
-MT4ChLC         equ " "
-MT4ChRC         equ " "
-MT4ChBB         equ $4c
-MT4ChBG         equ " "
-UseMT4Charset   UseCharset MT4
+;***
+;***
+;***
+MT4ChTile       = $56
+MT4ChLines      = $5d
+MT4ChLB         = $5a
+MT4ChRB         = $5f
+MT4ChLC         = ASCII_Space
+MT4ChRC         = ASCII_Space
+MT4ChBB         = $4c
+MT4ChBG         = ASCII_Space
+UseMT4Charset:  lda #MT4ChTile
+                sta CharTile
+                lda #MT4ChLines
+                sta CharLines
+                lda #MT4ChLB
+                sta CharLB
+                lda #MT4ChRB
+                sta CharRB
+                lda #MT4ChLC
+                sta CharLC
+                lda #MT4ChRC
+                sta CharRC
+                lda #MT4ChBB
+                sta CharBB
+                lda CharBG
+                sta OldCharBG
+                lda #MT4ChBG
+                sta CharBG
                 rts
-***
-***
-***
-UseRegCharset   UseCharset Reg
+;***
+;***
+;***
+RegChTile       = ASCII_Hash + $80
+RegChLines      = ASCII_Equal
+RegChLB         = ASCII_Exclam
+RegChRB         = ASCII_Exclam
+RegChLC         = ASCII_Plus
+RegChRC         = ASCII_Plus
+RegChBB         = ASCII_Dash
+RegChBG         = ASCII_Space
+UseRegCharset:  lda #RegChTile
+                sta CharTile
+                lda #RegChLines
+                sta CharLines
+                lda #RegChLB
+                sta CharLB
+                lda #RegChRB
+                sta CharRB
+                lda #RegChLC
+                sta CharLC
+                lda #RegChRC
+                sta CharRC
+                lda #RegChBB
+                sta CharBB
+                lda CharBG
+                sta OldCharBG
+                lda #RegChBG
+                sta CharBG
                 rts
-RegChTile       equ '#'
-RegChLines      equ "="
-RegChLB         equ "|"
-RegChRB         equ "|"
-RegChLC         equ "+"
-RegChRC         equ "+"
-RegChBB         equ "-"
-RegChBG         equ " "
-***
-***
-***
-UseReg2Charset  UseCharset Reg2
+;***
+;***
+;***
+Reg2ChTile      = ASCII_Hash
+Reg2ChLines     = ASCII_Dash
+Reg2ChLB        = ASCII_Space
+Reg2ChRB        = ASCII_Space
+Reg2ChLC        = ASCII_Space
+Reg2ChRC        = ASCII_Space
+Reg2ChBB        = ASCII_Space
+Reg2ChBG        = ASCII_Space + $80
+UseReg2Charset: lda #Reg2ChTile
+                sta CharTile
+                lda #Reg2ChLines
+                sta CharLines
+                lda #Reg2ChLB
+                sta CharLB
+                lda #Reg2ChRB
+                sta CharRB
+                lda #Reg2ChLC
+                sta CharLC
+                lda #Reg2ChRC
+                sta CharRC
+                lda #Reg2ChBB
+                sta CharBB
+                lda CharBG
+                sta OldCharBG
+                lda #Reg2ChBG
+                sta CharBG
                 rts
-Reg2ChTile      equ "#"
-Reg2ChLines     equ '-'
-Reg2ChLB        equ " "
-Reg2ChRB        equ " "
-Reg2ChLC        equ " "
-Reg2ChRC        equ " "
-Reg2ChBB        equ " "
-Reg2ChBG        equ ' '
-***
-***
-***
-CharTile        dfb 0
-CharLines       dfb 0
-CharLB          dfb 0
-CharRB          dfb 0
-CharLC          dfb 0
-CharRC          dfb 0
-CharBB          dfb 0
-CharBG          dfb 0
-OldCharBG       dfb 0
-TotalMTSets     equ 4
-TotalRegSets    equ 2
-CurrCharset     dfb 0
+;***
+;***
+;***
+ASCII_Hash      = $23
+ASCII_Dash      = $2d
+ASCII_Space     = $20
+ASCII_Plus      = $2b
+ASCII_Exclam    = $21
+ASCII_Equal     = $3d
+ASCII_y         = $79
+ASCII_n         = $6e
+CharTile:       .byte 0
+CharLines:      .byte 0
+CharLB:         .byte 0
+CharRB:         .byte 0
+CharLC:         .byte 0
+CharRC:         .byte 0
+CharBB:         .byte 0
+CharBG:         .byte 0
+OldCharBG:      .byte 0
+CurrCharset:    .byte 0
