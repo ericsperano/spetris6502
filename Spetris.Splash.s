@@ -2,7 +2,7 @@
 ;*** Display a menu asking which charset to use
 ;*** Set FlagMouseText to 1 if user choose MouseText
 ;***
-MenuCharset:     jsr HOME
+MenuCharset:    jsr HOME
                 sta ALTCHARSETOFF
                 JSRDisplayStr Splash00
                 JSRDisplayStr Splash00b

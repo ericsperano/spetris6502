@@ -4,7 +4,7 @@ DOS33_DSK:=spetris.dsk
 #ASM := Merlin32
 #ASM_FLAGS := -V
 ASM := ca65
-ASM_FLAGS := --cpu 65C02 -v -W2 -t apple2enh
+ASM_FLAGS := --cpu 65C02 -W2 -v -t apple2enh
 OBJ := spetris
 
 .PHONY: all
@@ -12,11 +12,12 @@ OBJ := spetris
 all: $(PRODOS_DSK)
 
 spetris:
-	$(ASM) $(ASM_FLAGS) Spetris.s -l spetris.lst -o spetris
+	$(ASM) $(ASM_FLAGS) Spetris.s -l spetris.lst
+	ld65 -o spetris.bin -C apple2bin.cfg Spetris.o
 
 $(PRODOS_DSK): clean $(OBJ)
 	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -pro140 $(PRODOS_DSK) SPETRIS
-	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -p $(PRODOS_DSK) spetris bin 0x2000 < spetris
+	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -p $(PRODOS_DSK) spetris bin 0x2000 < spetris.bin
 
 $(DOS33_DSK): clean $(OBJ)
 	#java -jar ~/bin/AppleCommander-ac-1.6.0.jar -dos140 $(DOS33_DSK) SPETRIS
