@@ -13,7 +13,7 @@ all: $(PRODOS_DSK)
 
 spetris:
 	$(ASM) $(ASM_FLAGS) Spetris.s -l spetris.lst
-	ld65 -o spetris.bin -C apple2bin.cfg Spetris.o
+	ld65 -t apple2enh -o spetris.bin -C apple2bin.cfg Spetris.o
 
 $(PRODOS_DSK): clean $(OBJ)
 	java -jar ~/bin/AppleCommander-ac-1.6.0.jar -pro140 $(PRODOS_DSK) SPETRIS
