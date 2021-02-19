@@ -14,7 +14,7 @@
                 jsr SplashScreen                ; display screen and wait for a key press
                 InitRandom                      ; generate some random numbers
                 InitPtr PointsTable;PtrPoints   ; init constant zero page pointers
-                InitPtr Field;PTR_Field
+                InitPtr Field;PtrField
 StartNewGame    jsr HOME                        ; clear screen
                 InitGame                        ; initialize new game
                 jsr InitField                   ; initialize clean field
@@ -77,7 +77,7 @@ roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr IncTotalPieces              ; increment total piece count
                 JSRDisplayBCD TotalPieces
                 ldx LinesCount                  ; did we get any lines?
-                beq endRound                    ; no, go get next piece
+                beq :endround                   ; no, go get next piece
                 jsr CheckLevel                  ; go check level
                 JSRDisplayBCD Level             ; refresh level and total lines display
                 JSRDisplayBCD TotalLines
@@ -90,7 +90,7 @@ roundLockPiece  jsr LockPiece                   ; lock the piece into field
                 jsr RemoveLines                 ; animation displayed, remove the lines from the field
                 ldx #1
                 stx FlagRefreshScr
-endRound        jmp startRound
+:endround       jmp startRound
 GameOver        jsr DrawField
                 JSRDisplayStr NewGameL
 ]askNewGame     lda KYBD                        ; poll keyboard
@@ -113,6 +113,9 @@ exitGame        jsr HOME                        ; clear screen and exit
 ;
 ;
 ;
+tmp1            dfb 0
+tmp2            dfb 0
+tmp3            dfb 0
 LinesCount      dfb 0           ; lines count after lock piece
 FlagForceDown   dfb 0
 FlagRefreshScr  dfb 0

@@ -1,17 +1,19 @@
 ;
 ; DisplayBCD
-; reuse dsStrLen from DisplayStr as temporary storage
+; TODO reuse dsStrLen from DisplayStr as temporary storage or tmp1/tmp2?
+; TODO more label cleanup
 ;
+; tmp1 = number length, tmp2 = save y, tmp3 = signifcant zero flag
 DisplayBCD      ldy #0
-                sty ddSignif                    ; significant zero flag
+                sty tmp3                        ; significant zero flag
                 lda (PtrDisplayStr),y           ; lo byte of the screen adress
-                sta PTR_ScreenPos
+                sta PtrScreenPos
                 iny
                 lda (PtrDisplayStr),y           ; hi byte of the screen adress
-                sta PTR_ScreenPos+1
+                sta PtrScreenPos+1
                 iny
                 lda (PtrDisplayStr),y           ; number length
-                sta dsStrLen
+                sta tmp1
                 clc
                 lda PtrDisplayStr               ; add 3 to lo byte of struct pointer to point to number
                 adc #$3
@@ -25,7 +27,7 @@ DisplayBCD      ldy #0
                 DO ]APPLE2E
                 phy                             ; save y and a
                 ELSE
-                sty ddTmpY
+                sty tmp2
                 FIN
                 pha
                 tya                             ; multiply y by 2
@@ -40,45 +42,40 @@ DisplayBCD      ldy #0
                 lsr
                 lsr
                 bne ddGrZero1                   ; branch if a is > 0
-                lda ddSignif                    ; check if we have hit a significant 0 yet
+                lda tmp3                        ; check if we have hit a significant 0 yet
                 beq ddSpace1                    ; no, print space
                 lda #0                          ; yes print 0
                 bra ddBcd2Asc1
 ddSpace1        lda #" "
                 bra ddWrite1
-ddGrZero1       inc ddSignif                    ; setting the flag to a non zero value
+ddGrZero1       inc tmp3                        ; setting the flag to a non zero value
 ddBcd2Asc1      clc
                 adc #$b0
-ddWrite1        sta (PTR_ScreenPos),y           ; write the character
+ddWrite1        sta (PtrScreenPos),y            ; write the character
                 iny                             ; next position on screen
                 ; lo 4 bits
                 pla                             ; restore original byte
                 and #$0f                        ; keep the lo 4 bits
                 bne ddGrZero2                   ; branch if a is > 0
-                lda ddSignif                    ; check if we have hit a significant 0 yet
+                lda tmp3                        ; check if we have hit a significant 0 yet
                 beq ddSpace2                    ; no, print space
 ddPr0           lda #0                          ; yes print 0
                 bra ddBcd2Asc2
-ddSpace2        cpx dsStrLen                    ; compare x, which is y + 1 with length, last 0 should be printed
+ddSpace2        cpx tmp1                        ; compare x, which is y + 1 with length, last 0 should be printed
                 beq ddPr0
                 lda #" "
                 bra ddWrite2
-ddGrZero2       inc ddSignif                    ; setting the flag to a non zero value
+ddGrZero2       inc tmp3                        ; setting the flag to a non zero value
 ddBcd2Asc2      clc
                 adc #$b0
-ddWrite2        sta (PTR_ScreenPos),y           ; write the character
+ddWrite2        sta (PtrScreenPos),y            ; write the character
                 DO ]APPLE2E
                 ply                             ; restore y
                 ELSE
-                ldy ddTmpY
+                ldy tmp2
                 FIN
                 iny                             ; next byte to display
                 inx                             ;
-                cpy dsStrLen
+                cpy tmp1
                 bne ]loop0                      ; keep looping
                 rts
-ddSignif        dfb 0
-                DO ]APPLE2E
-                ELSE
-ddTmpY          dfb 0
-                FIN

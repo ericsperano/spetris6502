@@ -4,10 +4,10 @@
 PtrTmp1         equ $06
 PtrTmp2         equ $08
 PtrPoints       equ $1d
-PTR_Piece       equ $ce
-PTR_Field       equ $eb
-PTR_FieldPos    equ $ed
-PTR_ScreenPos   equ $fa
+PtrPiece        equ $ce
+PtrField        equ $eb
+PtrFieldPos     equ $ed
+PtrScreenPos    equ $fa
 PtrDisplayStr   equ $fc         ; used by the DisplayStr routine
 
 ; Tileset Structure Size is 8 bytes

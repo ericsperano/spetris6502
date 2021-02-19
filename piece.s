@@ -6,30 +6,30 @@
 ;
 SetPtrPiece     pha                             ; save rotation on stack
                 lda #<Pieces                    ; lo byte of struct to display
-                sta PTR_Piece
+                sta PtrPiece
                 lda #>Pieces                    ; hi byte of struct to display
-                sta PTR_Piece+1
+                sta PtrPiece+1
                 cpx #0
                 beq :testRot
 ]loop0          clc
-                lda PTR_Piece
+                lda PtrPiece
                 adc #PieceStructLen
-                sta PTR_Piece
-                lda PTR_Piece+1
+                sta PtrPiece
+                lda PtrPiece+1
                 adc #0
-                sta PTR_Piece+1
+                sta PtrPiece+1
                 dex
                 bne ]loop0
 :testRot        pla ; take rotation from stack
                 tax
                 beq :end
 ]loop1          clc
-                lda PTR_Piece
+                lda PtrPiece
                 adc #PieceLen
-                sta PTR_Piece
-                lda PTR_Piece+1
+                sta PtrPiece
+                lda PtrPiece+1
                 adc #0
-                sta PTR_Piece+1
+                sta PtrPiece+1
                 dex
                 bne ]loop1
 :end            rts
@@ -47,24 +47,24 @@ DrawPiece       lda PieceRot
                 ldx PieceX
                 jsr SetScreenPos
                 ldy #0
-]loop0          lda (PTR_Piece),y
+]loop0          lda (PtrPiece),y
                 cmp #ChTransparent
                 beq :nextCh
                 lda TSBox
-                sta (PTR_ScreenPos),y
+                sta (PtrScreenPos),y
 :nextCh         iny
                 cpy #4  ; 4 cols
                 bne ]loop0
                 inc drawPieceY
                 dec drawPieceRows     ; go to end of routine if no more rows
                 beq dpend
-                lda PTR_Piece   ; we add 4 to PTR_Piece to point to next row from the base adress to use y at 0
+                lda PtrPiece   ; we add 4 to PTR_Piece to point to next row from the base adress to use y at 0
                 clc
                 adc #4
-                sta PTR_Piece
-                lda PTR_Piece+1
+                sta PtrPiece
+                lda PtrPiece+1
                 adc #0          ; add carry 0 to hi byte
-                sta PTR_Piece+1
+                sta PtrPiece+1
                 bra ]loop1
 dpend           rts
 drawPieceY      dfb 0
@@ -83,26 +83,26 @@ DrawNextPiece   lda NextRotation
                 ldx #$10
                 jsr SetScreenPos
                 ldy #0
-]loop0          lda (PTR_Piece),y
+]loop0          lda (PtrPiece),y
                 cmp #'.'
                 bne :setBrick
                 lda TSNextBG
                 bra :draw
 :setBrick       lda TSBox
-:draw           sta (PTR_ScreenPos),y
+:draw           sta (PtrScreenPos),y
                 iny
                 cpy #4  ; 4 cols
                 bne ]loop0
                 inc drawPieceY
                 dec drawPieceRows     ; go to end of routine if no more rows
                 beq :end
-                lda PTR_Piece   ; we add 4 to PTR_Piece to point to next row from the base adress to use y at 0
+                lda PtrPiece   ; we add 4 to PTR_Piece to point to next row from the base adress to use y at 0
                 clc
                 adc #4
-                sta PTR_Piece
-                lda PTR_Piece+1
+                sta PtrPiece
+                lda PtrPiece+1
                 adc #0          ; add carry 0 to hi byte
-                sta PTR_Piece+1
+                sta PtrPiece+1
                 bra ]loop1
 :end            rts
 ;

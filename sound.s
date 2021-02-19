@@ -32,5 +32,4 @@ PointsSounds
                 cpx LinesCount
                 bne ]loop0
 :end            rts
-tmp1            dfb 0
 Notes           dfb 250, 220, 190, 160

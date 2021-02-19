@@ -3,13 +3,13 @@
 ;
 DisplayStr      ldy #$00
                 lda (PtrDisplayStr),y           ; lo byte of the screen adress
-                sta PTR_ScreenPos
+                sta PtrScreenPos
                 iny
                 lda (PtrDisplayStr),y           ; hi byte of the screen adress
-                sta PTR_ScreenPos+1
+                sta PtrScreenPos+1
                 iny
                 lda (PtrDisplayStr),y           ; string length
-                sta dsStrLen
+                sta tmp1
                 clc                             ; clear carry flag
                 lda PtrDisplayStr               ; add 3 to lo byte of struct pointer to point to text
                 adc #$3
@@ -19,9 +19,8 @@ DisplayStr      ldy #$00
                 sta PtrDisplayStr+1             ; save hi byte
                 ldy #$00
 ]loop           lda (PtrDisplayStr),y           ; get char to display
-                sta (PTR_ScreenPos),y           ; copy to screen
+                sta (PtrScreenPos),y            ; copy to screen
                 iny
-                cpy dsStrLen
+                cpy tmp1
                 bne ]loop
                 rts
-dsStrLen        dfb 0                           ; copy of the current string length
