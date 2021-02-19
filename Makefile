@@ -17,14 +17,11 @@ spetris: $(SRC)
 spetrisb: $(SRC)
 	$(ASM) $(ASM_FLAGS) macro spetrisb.s
 
-# TODO
-#$(PRODOS_DSK): clean_prodos $(OBJ)
 $(PRODOS_DSK): $(OBJ)
 	$(AC) -pro140 $(PRODOS_DSK) SPETRIS
 	$(AC) -p $(PRODOS_DSK) spetris bin 0x2000 < spetris
 	$(AC) -p $(PRODOS_DSK) spetrisb bin 0x2000 < spetrisb
 
-#$(DOS_DSK): clean_dos $(OBJ)
 $(DOS_DSK): $(OBJ)
 	$(AC) -dos140 $(DOS_DSK) SPETRIS
 	$(AC) -p $(DOS_DSK) spetris bin 0x2000 < spetris
