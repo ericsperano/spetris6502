@@ -3,7 +3,7 @@
 ;;;
 ;;; Compile Flags:
 ]APPLE2E = 1 ; will enable mouse text and 65c02 extra instructions
-TotalTilesets   equ 12
+TotalTilesets   equ 11
                 org $2000
                 put constants
                 put main
