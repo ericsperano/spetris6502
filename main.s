@@ -1,4 +1,5 @@
-; SPETRIS FOR THE APPLE II COMPUTER
+; Spetris For the Apple ][+ and Apple //e Computers
+; By Eric Sperano 2020-2021
 ;
 ; TODO use FLS (flashing text), and REV.. consider STR too
 ; TODO Blinking game over (regular ascii)

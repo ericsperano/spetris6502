@@ -28,20 +28,20 @@ SetFieldPos     phy
 ;
 ;
 InitField       ldx #0
-                lda #16                         ; TODO FieldRows - 1
+                lda #{FieldRows-1}
                 pha                             ; save rows counter on stack
-ifLoop0         lda #" "                        ; col 0 is always space (Not CharBG)
+]loop0          lda #" "                        ; col 0 is always space (Not CharBG)
                 sta Field,x
                 inx
                 lda TSLeftBar                   ; col 1 is left bar
                 sta Field,x
                 inx
-                ldy #{FieldCols-4} ;10                         ; TODO FieldCols - 4
+                ldy #{FieldCols-4}
                 lda TSBackground
-ifLoop1         sta Field,x                     ; BG for col 2 to 11
+]loop1          sta Field,x                     ; BG for col 2 to 11
                 inx
                 dey
-                bne ifLoop1
+                bne ]loop1
                 lda TSRightBar                  ; col 12 is right bar
                 sta Field,x
                 inx
@@ -52,19 +52,19 @@ ifLoop1         sta Field,x                     ; BG for col 2 to 11
                 sec
                 sbc #1                          ; decrement
                 pha                             ; put back on stack
-                bne ifLoop0                     ; loop if more rows
+                bne ]loop0                      ; loop if more rows
                 lda #" "                        ; last line, col 0 is space
                 sta Field,x
                 inx
                 lda TSLeftCorner                ; left corner
                 sta Field,x
                 inx
-                ldy #10 ; TODO test this: #{FieldCols-4} ???
+                ldy #{FieldCols-4}
                 lda TSBottomBar                 ; bottom bar for cols 2 to 11
-ifLoop2         sta Field,x
+]loop2          sta Field,x
                 inx
                 dey
-                bne ifLoop2
+                bne ]loop2
                 lda TSRightCorner               ; right corner
                 sta Field,x
                 inx
