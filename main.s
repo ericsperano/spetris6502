@@ -5,7 +5,9 @@
 ; TODO Blinking game over (regular ascii)
 ; TODO Blinking Paused (regular ascii)
 ; TODO Blinking Press Any Key in splash screen (regular ascii)
-;
+; TODO better locase/upcase key check
+; TODO non arrow key repeat
+; TODO fix splash regular ascii
                 use macro/display
                 use macro/init
                 use macro/ptr

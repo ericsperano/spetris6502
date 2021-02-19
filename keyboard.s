@@ -3,7 +3,7 @@
 ;
 KeyPressed      sta STROBE
                 cmp #KeyUpArrow                 ; is it the up arrow key?
-                bne testaKey                    ; no, keep searching
+                bne testhKey                    ; no, keep searching
 doUpKey         ldx PieceRot
                 bne decRot
                 ldx #3
@@ -17,32 +17,44 @@ storeRot        stx TryPieceRot
                 ldx #1                          ; and refresh screen
                 stx FlagRefreshScr
 endUpKey        rts
-testaKey        cmp #Keya
-                bne testAKey
+testhKey        cmp #Keyh
+                bne testHKey
                 bra doUpKey
-testAKey        cmp #KeyA
+testHKey        cmp #KeyH
                 bne testLeftKey
                 bra doUpKey
 testLeftKey     cmp #KeyLeftArrow               ; is it the left arrow key?
-                bne testRightKey                ; no, keep searching
-                dec TryPieceX                   ; yes, try with x - 1
+                bne testbKey                    ; no, keep searching
+doLeftKey       dec TryPieceX                   ; yes, try with x - 1
                 jsr DoesPieceFit
                 bcc endLeftKey                  ; does not fit, return
                 dec PieceX                      ; it fits, decrease x
                 ldx #1                          ; and refresh screen
                 stx FlagRefreshScr
 endLeftKey      rts
+testbKey        cmp #Keyb
+                bne testBKey
+                bra doLeftKey
+testBKey        cmp #KeyB
+                bne testRightKey
+                bra doLeftKey
 testRightKey    cmp #KeyRightArrow              ; is it the right arrow key?
-                bne testDownKey                 ; no, keep searching
-                inc TryPieceX                   ; yes, try with x + 1
+                bne testmKey                     ; no, keep searching
+doRightKey      inc TryPieceX                   ; yes, try with x + 1
                 jsr DoesPieceFit
                 bcc endRightKey                 ; does not fit, return
                 inc PieceX                      ; it fits, increase x
                 ldx #1                          ; and refresh screen
                 stx FlagRefreshScr
 endRightKey     rts
+testmKey        cmp #Keym
+                bne testMKey
+                bra doRightKey
+testMKey        cmp #KeyM
+                bne testDownKey
+                bra doRightKey
 testDownKey     cmp #KeyDownArrow               ; is it the down arrow key?
-                bne testzKey                    ; no, keep searching
+                bne testnKey                    ; no, keep searching
                  ; TODO reset the forcedown
 doDownKey       inc TryPieceY                   ; yes, try with y + 1
                 jsr DoesPieceFit
@@ -51,10 +63,10 @@ doDownKey       inc TryPieceY                   ; yes, try with y + 1
                 ldx #1                          ; and refresh screen
                 stx FlagRefreshScr
 endDownKey      rts
-testzKey        cmp #Keyz
-                bne testZKey
+testnKey        cmp #Keyn
+                bne testNKey
                 bra doDownKey
-testZKey        cmp #KeyZ
+testNKey        cmp #KeyN
                 bne testSpaceKey
                 bra doDownKey
 testSpaceKey    cmp #KeySpace                   ; is it the space bar?
