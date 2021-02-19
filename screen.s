@@ -21,8 +21,6 @@ SetScreenPos    phy
                 ply
                 rts
 ;
-;SSP_X           dfb 0 ; to rename X tmp TODO
-;
 ;
 ;
                 DO ]APPLE2E
@@ -34,10 +32,10 @@ ScoreL          dfb $10,$07,6
                 asc "Score:"
 LevelL          dfb $90,$07,6
                 asc "Level:"
-TotalPiecesL    dfb $38,$04,13
-                asc "Total Pieces:"
-TotalLinesL     dfb $b8,$04,12
-                asc "Total Lines:"
+TotalPiecesL    dfb $38,$04,7
+                asc "Pieces:"
+TotalLinesL     dfb $b8,$04,6
+                asc "Lines:"
 NextPieceL      dfb $38,$06,11
                 asc "Next Piece:"
 NewGameL        dfb $dd,$06,13
@@ -53,10 +51,10 @@ ScoreL          dfb $10,$07,6
                 asc "SCORE:"
 LevelL          dfb $90,$07,6
                 asc "LEVEL:"
-TotalPiecesL    dfb $38,$04,13
-                asc "TOTAL PIECES:"
-TotalLinesL     dfb $b8,$04,12
-                asc "TOTAL LINES:"
+TotalPiecesL    dfb $38,$04,7
+                asc "PIECES:"
+TotalLinesL     dfb $b8,$04,6
+                asc "LINES:"
 NextPieceL      dfb $38,$06,11
                 asc "NEXT PIECE:"
 NewGameL        dfb $dd,$06,13

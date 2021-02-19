@@ -15,8 +15,8 @@ PtrDisplayStr   equ $fc         ; used by the DisplayStr routine
 ; box, lines, left bar, right bar, left corner, right corner, bottom bar, background
 TilesetSize     equ 9
 
-; Which lines the NextPieceY is displayed
-; TODO NextPieceX ?
+; col and row of where the next piece is displayed
+NextPieceX      equ 16
 NextPieceY      equ 12
 
 ;

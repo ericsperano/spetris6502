@@ -51,34 +51,50 @@ SplashTitle     dfb $8b,$04,16
                 asc "S P E T R // S !"
 SplashAuthor    dfb $88,$05,22
                 asc "By Eric Sperano (2021)"
-SplashForApl    dfb $87,$06,25
-                asc "For "
+SplashForApl    dfb $85,$06,28
+                asc "For The "
                 dfb $40
-                asc " Apple //e Computers"
-SplashGameCtrl  dfb $30,$04,22
-                asc "Keyboard Game Controls"
-SplashKeyUp     dfb $2f,$05,20
-                dfb $4b
-                asc " or A  Rotate Piece"
-SplashKeyLeft   dfb $af,$05,23
+                asc " Apple //e Computer"
+SplashGameCtrl  dfb $2f,$04,24
+                asc ' '
+                dfb $0b
+                asc 'eyboard '
+                dfb $07
+                asc 'ame '
+                dfb $03
+                asc 'ontrols '
+SplashKeyLeft   dfb $2f,$05,20
                 dfb $48
-                asc "       Move Piece Left"
-SplashKeyRight  dfb $2f,$06,24
+                asc " or B     Move Left"
+SplashKeyRight  dfb $af,$05,21
                 dfb $55
-                asc "       Move Piece Right"
-SplashKeyDown   dfb $af,$06,23
+                asc " or M     Move Right"
+SplashKeyUp     dfb $2f,$06,17
+                dfb $4b
+                asc " or H     Rotate"
+SplashKeyDown   dfb $af,$06,20
                 dfb $4a
-                asc " or Z  Move Piece Down"
-SplashKeySpace  dfb $2f,$07,18
-                asc "Space   Drop Piece"
-SplashKeyP      dfb $af,$07,18
-                asc "P       Pause Game"
-SplashKey1      dfb $57,$04,21
-                asc "1       Change Style!"
-SplashKeyEsc    dfb $D7,$04,17
-                asc "Esc     Quit Game"
-SplashAnyKey    dfb $d8,$06,22
-                asc "Press Any Key To Start"
+                asc " or N     Move Down"
+SplashKeySpace  dfb $2f,$07,15
+                asc "Space      Drop"
+SplashKeyP      dfb $d7,$04,16
+                asc "P          Pause"
+SplashKey1      dfb $57,$05,24
+                asc "1          Change Style!"
+SplashKeyEsc    dfb $57,$06,15
+                asc "Esc        Quit"
+SplashAnyKey    dfb $57,$07,24
+                asc ' '
+                dfb $10
+                asc 'ress '
+                dfb $01
+                asc 'ny '
+                dfb $0b
+                asc 'ey '
+                dfb $14
+                asc 'o '
+                dfb $13
+                asc 'tart '
                 ELSE
                 ; APPLE II/II+
 SplashTitle     dfb $8b,$04,16
@@ -89,22 +105,24 @@ SplashForApl    dfb $88,$06,22
                 asc "FOR APPLE ][ COMPUTERS"
 SplashGameCtrl  dfb $30,$04,22
                 asc "KEYBOARD GAME CONTROLS"
-SplashKeyUp     dfb $2b,$05,29
-                asc "A                ROTATE PIECE"
-SplashKeyLeft   dfb $ab,$05,32
-                asc "LEFT ARROW       MOVE PIECE LEFT"
-SplashKeyRight  dfb $2b,$06,33
-                asc "RIGHT ARROW      MOVE PIECE RIGHT"
-SplashKeyDown   dfb $ab,$06,32
-                asc "Z                MOVE PIECE DOWN"
-SplashKeySpace  dfb $2b,$07,27
-                asc "SPACE            DROP PIECE"
-SplashKeyP      dfb $ab,$07,27
-                asc "P                PAUSE GAME"
-SplashKey1      dfb $53,$04,30
+SplashKeyUp     dfb $2e,$05,23
+                asc "A                ROTATE"
+SplashKeyLeft   dfb $ae,$05,26
+                asc "LEFT ARROW       MOVE LEFT"
+SplashKeyRight  dfb $2e,$06,27
+                asc "RIGHT ARROW      MOVE RIGHT"
+SplashKeyDown   dfb $ae,$06,26
+                asc "Z                MOVE DOWN"
+SplashKeySpace  dfb $2e,$07,21
+                asc "SPACE            DROP"
+SplashKeyP      dfb $ae,$07,22
+                asc "P                PAUSE"
+SplashKey1      dfb $56,$04,30
                 asc "1                CHANGE STYLE!"
-SplashKeyEsc    dfb $d3,$04,26
-                asc "ESC              QUIT GAME"
-SplashAnyKey    dfb $d8,$06,22
+SplashKeyEsc    dfb $56,$06,21
+                asc "ESC              QUIT"
+SplashAnyKey    dfb $58,$07,22
                 asc "PRESS ANY KEY TO START"
                 FIN
+SplashAnyKeyX   dfb $57,$07,24
+                ds 24, ' '
