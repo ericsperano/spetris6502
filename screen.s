@@ -7,21 +7,21 @@ SetScreenPos    phy
                 tya
                 asl ; multiply by 2 because each array elem is 2 bytes (an address)
                 tay
-                stx SSP_X
-                InitPtr FieldPositions;PTR_FieldPos
+                stx tmp1
+                InitPtr FieldPositions;PtrFieldPos
                 clc
-                lda (PTR_FieldPos),y
-                adc SSP_X
-                sta PTR_ScreenPos
+                lda (PtrFieldPos),y
+                adc tmp1
+                sta PtrScreenPos
                 iny
-                lda (PTR_FieldPos),y
+                lda (PtrFieldPos),y
                 ;adc #0   ; negative numbers set the carry bit
-                sta PTR_ScreenPos+1
+                sta PtrScreenPos+1
                 plx
                 ply
                 rts
 ;
-SSP_X           dfb 0 ; to rename X tmp TODO
+;SSP_X           dfb 0 ; to rename X tmp TODO
 ;
 ;
 ;

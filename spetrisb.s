@@ -27,15 +27,15 @@ TotalTilesets   equ 3
                 put constants
                 put main
                 put bcd
-                put str
-                put random
+                put field
                 put keyboard
                 put level
                 put piece
-                put field
+                put random
                 put score
                 put screen
                 put sleep
                 put sound
                 put splash
+                put string
                 put tileset
