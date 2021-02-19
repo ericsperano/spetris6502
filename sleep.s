@@ -19,4 +19,3 @@ Sleep           pha
                 pla
                 FIN
                 rts
-SleepTime       equ $ff

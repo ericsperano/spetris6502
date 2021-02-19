@@ -25,7 +25,9 @@ NextPieceY      equ 12
 KYBD            equ $c000
 STROBE          equ $c010
 HOME            equ $fc58
-Speaker         equ $c030
+SPEAKER         equ $c030
+ALTCHARSETON    equ $c00f
+ALTCHARSETOFF   equ $c00e
 
 ;
 ; Key constants
@@ -48,3 +50,18 @@ Keyy            equ "y"
 KeyY            equ "Y"
 Keyz            equ "z"
 KeyZ            equ "Z"
+;
+;
+;
+FieldCols       equ 14
+FieldRows       equ 17
+;
+;
+;
+ChTransparent   equ '.'
+PieceLen        equ 16
+PieceStructLen  equ 4 * PieceLen                  ; 4 different rotations
+;
+;
+;
+SleepTime       equ $ff

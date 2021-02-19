@@ -84,7 +84,7 @@ DrawNextPiece   lda NextRotation
                 jsr SetScreenPos
                 ldy #0
 ]loop0          lda (PtrPiece),y
-                cmp #'.'
+                cmp #ChTransparent
                 bne :setBrick
                 lda TSNextBG
                 bra :draw
@@ -165,9 +165,6 @@ InitTryPieces   pha                             ; save a
 ;
 ;
 ;
-ChTransparent   equ '.'
-PieceLen        equ 16
-PieceStructLen  equ 4*PieceLen                  ; 4 different rotations
 Pieces          asc '..X...X...X...X.'          ; rotation 0 piece 0
                 asc '........XXXX....'          ; rotation 1
                 asc '.X...X...X...X..'          ; rotation 2

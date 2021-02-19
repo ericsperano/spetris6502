@@ -11,8 +11,6 @@ AltCharSetOff   MAC
                 sta ALTCHARSETOFF               ; disable alternate char set
                 FIN
                 <<<
-ALTCHARSETON    equ $c00f
-ALTCHARSETOFF   equ $c00e
 ;
 ;
 ;

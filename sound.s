@@ -5,7 +5,7 @@ PlaySound       phy
                 phx
 ]loop           plx
                 phx
-                lda Speaker
+                lda SPEAKER
 ]delay          dex
                 bne ]delay
                 dey
@@ -32,4 +32,4 @@ PointsSounds
                 cpx LinesCount
                 bne ]loop0
 :end            rts
-Notes           dfb 250, 220, 190, 160
+Notes           dfb 250, 220, 190, 160          ; different pitch for line 1 to 4

@@ -334,8 +334,6 @@ dfTmpPosY       dfb 0
 ;
 ;
 ;
-FieldCols       equ 14
-FieldRows       equ 17
 Field           ds  210, 0    ; FieldCols * (FieldRows - 2)  2 because of the following 2
 FieldBottom     ds  28, 0     ; last line ptr so FieldCols + another FieldCols for bottom bar
 ; total field size is 14*17=238 so we can use an 8bit index
