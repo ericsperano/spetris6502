@@ -20,11 +20,6 @@ SplashScreen    jsr HOME                        ; clear screen
                 lda #0
                 sta TilesetID
                 jsr UseTileset
-                ;DO ]APPLE2E
-                ;jsr UseMTCharset
-                ;ELSE
-                ;jsr UseRegCharset
-                ;FIN
 ]loop           clc                             ; increment the 32bit seed
                 lda Rand                        ; TODO should be a macro
                 adc #1
@@ -103,26 +98,26 @@ SplashAuthor    dfb $88,$05,22
                 asc "BY ERIC SPERANO (2021)"
 SplashForApl    dfb $88,$06,22
                 asc "FOR APPLE ][ COMPUTERS"
-SplashGameCtrl  dfb $30,$04,22
-                asc "KEYBOARD GAME CONTROLS"
-SplashKeyUp     dfb $2e,$05,23
-                asc "A                ROTATE"
-SplashKeyLeft   dfb $ae,$05,26
-                asc "LEFT ARROW       MOVE LEFT"
-SplashKeyRight  dfb $2e,$06,27
-                asc "RIGHT ARROW      MOVE RIGHT"
-SplashKeyDown   dfb $ae,$06,26
-                asc "Z                MOVE DOWN"
-SplashKeySpace  dfb $2e,$07,21
-                asc "SPACE            DROP"
-SplashKeyP      dfb $ae,$07,22
-                asc "P                PAUSE"
-SplashKey1      dfb $56,$04,30
-                asc "1                CHANGE STYLE!"
-SplashKeyEsc    dfb $56,$06,21
-                asc "ESC              QUIT"
-SplashAnyKey    dfb $58,$07,22
-                asc "PRESS ANY KEY TO START"
+SplashGameCtrl  dfb $2f,$04,24
+                inv " KEYBOARD GAME CONTROLS "
+SplashKeyLeft   dfb $2c,$05,28
+                asc "B OR LEFT ARROW    MOVE LEFT"
+SplashKeyRight  dfb $ac,$05,29
+                asc "M OR RIGHT ARROW   MOVE RIGHT"
+SplashKeyUp     dfb $2c,$06,25
+                asc "A                  ROTATE"
+SplashKeyDown   dfb $ac,$06,28
+                asc "Z                  MOVE DOWN"
+SplashKeySpace  dfb $2c,$07,23
+                asc "SPACE              DROP"
+SplashKeyP      dfb $d4,$04,24
+                asc "P                  PAUSE"
+SplashKey1      dfb $54,$05,32
+                asc "1                  CHANGE STYLE!"
+SplashKeyEsc    dfb $54,$06,23
+                asc "ESC                QUIT"
+SplashAnyKey    dfb $57,$07,24
+                inv ' PRESS ANY KEY TO START '
                 FIN
-SplashAnyKeyX   dfb $57,$07,24
-                ds 24, ' '
+;SplashAnyKeyX   dfb $57,$07,24
+;                ds 24, ' '

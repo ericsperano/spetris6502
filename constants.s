@@ -40,18 +40,12 @@ KeySpace        equ $a0
 KeyEscape       equ $9b
 Key1            equ "1"
 Key2            equ "2"
-Keyb            equ "b"
-KeyB            equ "B"
-Keyh            equ "h"
-KeyH            equ "H"
-Keym            equ "m"
-KeyM            equ "M"
-Keyn            equ "n"
-KeyN            equ "N"
-Keyp            equ "p"
-KeyP            equ "P"
-Keyy            equ "y"
-KeyY            equ "Y"
+KeyB            equ "b"
+KeyH            equ "h"
+KeyM            equ "m"
+KeyN            equ "n"
+KeyP            equ "p"
+KeyY            equ "y"
 ;
 ;
 ;

@@ -1,13 +1,11 @@
 ; Spetris For the Apple ][+ and Apple //e Computers
 ; By Eric Sperano 2020-2021
 ;
-; TODO use FLS (flashing text), and REV.. consider STR too
+; TODO use FLS (flashing text), and inv.. consider STR/REV too
 ; TODO Blinking game over (regular ascii)
 ; TODO Blinking Paused (regular ascii)
 ; TODO Blinking Press Any Key in splash screen (regular ascii)
-; TODO better locase/upcase key check
 ; TODO non arrow key repeat
-; TODO fix splash regular ascii
 ; TODO use word type for screen adresses
                 use macro/display
                 use macro/init
@@ -63,7 +61,7 @@ pollKeyboard    lda KYBD                        ; polls keyboard
                 jsr KeyPressed                  ; go handle key pressed
                 ldx FlagQuitGame                ; esc pressed?
                 beq chkForceDown                ; no, go on
-                jmp exitGame                    ; yes, exit game
+                jmp :exitGame                   ; yes, exit game
 chkForceDown    ldx FlagForceDown               ; is it time for piece to go down?
                 bne moveDown                    ; yes
                 bra roundLoop                   ; no, loop
@@ -102,18 +100,11 @@ GameOver        jsr DrawField
                 cmp #$80                        ; key pressed?
                 bcc ]askNewGame                 ; no, keep polling
                 sta STROBE                      ; key pressed
-                cmp #Keyy                       ; check lower case y
-                bne :testKeyY                   ; no, keep checking
-                jmp StartNewGame                ; yes, start new game
-:testKeyY       cmp #KeyY                       ; check upper case Y
-                bne :testKeyn                   ; no, keep checking
-                jmp StartNewGame                ; yes, start new game
-:testKeyn       cmp #Keyn                       ; check lower case n
-                bne :testKeyN                   ; no, keep checking
-                bra exitGame                    ; yes, exit game
-:testKeyN       cmp #KeyN                       ; check upper case n
-                bne ]askNewGame                 ; no, loop
-exitGame        jsr HOME                        ; clear screen and exit
+                Check1Key KeyY;:doNewGame;:testKeyN
+:doNewGame      jmp StartNewGame                ; yes, start new game
+:testKeyN       Check1Key KeyN;:exitGame;]askNewGame
+:exitGame       jsr HOME                        ; clear screen and exit
+                AltCharSetOff
                 rts
 ;
 ;

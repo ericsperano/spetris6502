@@ -3,7 +3,7 @@
 ;
 KeyPressed      sta STROBE
 ; Up Key ?
-                Check2Keys KeyUpArrow;Keyh;:doUp;:testLeft
+                Check2Keys KeyUpArrow;KeyH;:doUp;:testLeft
 :doUp           ldx PieceRot
                 bne :decr
                 ldx #3
@@ -17,7 +17,7 @@ KeyPressed      sta STROBE
                 SetFlagRefresh                  ; and refresh screen
 :endUpKey       rts
 ; Left Key ?
-:testLeft       Check2Keys KeyLeftArrow;Keyb;:doLeft;:testRight
+:testLeft       Check2Keys KeyLeftArrow;KeyB;:doLeft;:testRight
 :doLeft         dec TryPieceX                   ; try with x - 1
                 jsr DoesPieceFit
                 bcc :endLeftKey                 ; does not fit, return
@@ -25,7 +25,7 @@ KeyPressed      sta STROBE
                 SetFlagRefresh                  ; and refresh screen
 :endLeftKey     rts
 ; Right Key ?
-:testRight      Check2Keys #KeyRightArrow;Keym;:doRight;:testDown
+:testRight      Check2Keys #KeyRightArrow;KeyM;:doRight;:testDown
 :doRight        inc TryPieceX                   ; try with x + 1
                 jsr DoesPieceFit
                 bcc :endRightKey                ; does not fit, return
@@ -33,7 +33,7 @@ KeyPressed      sta STROBE
                 SetFlagRefresh                  ; and refresh screen
 :endRightKey    rts
 ; Down Key ?
-:testDown       Check2Keys #KeyDownArrow;Keyn;:doDown;:testSpace
+:testDown       Check2Keys #KeyDownArrow;KeyN;:doDown;:testSpace
 :doDown         inc TryPieceY                   ; try with y + 1
                 jsr DoesPieceFit
                 bcc :endDownKey                 ; does not fit, return
@@ -55,7 +55,7 @@ KeyPressed      sta STROBE
                 stx FlagQuitGame
                 rts
 ; P Key ?
-:testP          Check1Key Keyp;:doP;:test1
+:testP          Check1Key KeyP;:doP;:test1
 :doP            JSRDisplayStr PausedL           ; display pause message
 ]loop           lda KYBD                        ; poll keyboard
                 cmp #$80                        ; key pressed?
