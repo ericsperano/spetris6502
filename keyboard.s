@@ -2,109 +2,82 @@
 ;
 ;
 KeyPressed      sta STROBE
-                cmp #KeyUpArrow                 ; is it the up arrow key?
-                bne testhKey                    ; no, keep searching
-doUpKey         ldx PieceRot
-                bne decRot
+; Up Key ?
+                Check2Keys KeyUpArrow;Keyh;:doUp;:testLeft
+:doUp           ldx PieceRot
+                bne :decr
                 ldx #3
-                bra storeRot
-decRot          dex
-storeRot        stx TryPieceRot
+                bra :store
+:decr           dex
+:store          stx TryPieceRot
                 jsr DoesPieceFit
-                bcc endUpKey                    ; does not fit, return
+                bcc :endUpKey                   ; does not fit, return
                 ldx TryPieceRot                 ; it fits, copy the new rotation value
                 stx PieceRot
-                ldx #1                          ; and refresh screen
-                stx FlagRefreshScr
-endUpKey        rts
-testhKey        cmp #Keyh
-                bne testHKey
-                bra doUpKey
-testHKey        cmp #KeyH
-                bne testLeftKey
-                bra doUpKey
-testLeftKey     cmp #KeyLeftArrow               ; is it the left arrow key?
-                bne testbKey                    ; no, keep searching
-doLeftKey       dec TryPieceX                   ; yes, try with x - 1
+                SetFlagRefresh                  ; and refresh screen
+:endUpKey       rts
+; Left Key ?
+:testLeft       Check2Keys KeyLeftArrow;Keyb;:doLeft;:testRight
+:doLeft         dec TryPieceX                   ; try with x - 1
                 jsr DoesPieceFit
-                bcc endLeftKey                  ; does not fit, return
+                bcc :endLeftKey                 ; does not fit, return
                 dec PieceX                      ; it fits, decrease x
-                ldx #1                          ; and refresh screen
-                stx FlagRefreshScr
-endLeftKey      rts
-testbKey        cmp #Keyb
-                bne testBKey
-                bra doLeftKey
-testBKey        cmp #KeyB
-                bne testRightKey
-                bra doLeftKey
-testRightKey    cmp #KeyRightArrow              ; is it the right arrow key?
-                bne testmKey                     ; no, keep searching
-doRightKey      inc TryPieceX                   ; yes, try with x + 1
+                SetFlagRefresh                  ; and refresh screen
+:endLeftKey     rts
+; Right Key ?
+:testRight      Check2Keys #KeyRightArrow;Keym;:doRight;:testDown
+:doRight        inc TryPieceX                   ; try with x + 1
                 jsr DoesPieceFit
-                bcc endRightKey                 ; does not fit, return
+                bcc :endRightKey                ; does not fit, return
                 inc PieceX                      ; it fits, increase x
-                ldx #1                          ; and refresh screen
-                stx FlagRefreshScr
-endRightKey     rts
-testmKey        cmp #Keym
-                bne testMKey
-                bra doRightKey
-testMKey        cmp #KeyM
-                bne testDownKey
-                bra doRightKey
-testDownKey     cmp #KeyDownArrow               ; is it the down arrow key?
-                bne testnKey                    ; no, keep searching
-                 ; TODO reset the forcedown
-doDownKey       inc TryPieceY                   ; yes, try with y + 1
+                SetFlagRefresh                  ; and refresh screen
+:endRightKey    rts
+; Down Key ?
+:testDown       Check2Keys #KeyDownArrow;Keyn;:doDown;:testSpace
+:doDown         inc TryPieceY                   ; try with y + 1
                 jsr DoesPieceFit
-                bcc endDownKey                  ; does not fit, return
+                bcc :endDownKey                 ; does not fit, return
                 inc PieceY                      ; it fits, increase y
-                ldx #1                          ; and refresh screen
-                stx FlagRefreshScr
-endDownKey      rts
-testnKey        cmp #Keyn
-                bne testNKey
-                bra doDownKey
-testNKey        cmp #KeyN
-                bne testSpaceKey
-                bra doDownKey
-testSpaceKey    cmp #KeySpace                   ; is it the space bar?
-                bne testEscKey                  ; no keep searching
+                SetFlagRefresh                  ; and refresh screen
+:endDownKey     rts
+; Space Key ?
+:testSpace      cmp #KeySpace                   ; is it the space bar?
+                bne :testEsc                    ; no keep searching
                 ldx #1                          ;
                 stx FlagForceDown
                 stx FlagFalling
                 stx FlagRefreshScr
-                bra end1Key
-testEscKey      cmp #KeyEscape                  ; is it the escape key?
-                bne testpKey                    ; no, keep searching
+                rts
+; Esc Key ?
+:testEsc        cmp #KeyEscape                  ; is it the escape key?
+                bne :testP                      ; no keep searching
                 ldx #1                          ; yes, quit the game
                 stx FlagQuitGame
-endEscKey       rts
-testpKey        cmp #Keyp                       ; is it the P key?
-                bne testPKey                    ; no, return
-doPKey          JSRDisplayStr PausedL           ; yes, display pause message
-pauseLoop       lda KYBD                        ; poll keyboard
+                rts
+; P Key ?
+:testP          Check1Key Keyp;:doP;:test1
+:doP            JSRDisplayStr PausedL           ; display pause message
+]loop           lda KYBD                        ; poll keyboard
                 cmp #$80                        ; key pressed?
-                bcc pauseLoop                   ; no, keep polling
+                bcc ]loop                       ; no, keep polling
                 sta STROBE                      ; key pressed
                 JSRDisplayStr PausedBlankL      ; erase pause msg and return
-testPKey        cmp #KeyP                       ; is it the P key?
-                bne test1Key                    ; no, return
-                bra doPKey
-test1Key        cmp #Key1
-                bne end1Key
-                ldx TilesetID
+                rts
+; 1 Key ?
+:test1          cmp #Key1
+                bne :end1Key
+                ldx TilesetID                   ; increment tileset id
                 inx
-                cpx #TotalTilesets
+                cpx #TotalTilesets              ; reset if overflow
                 bne :savetid
                 ldx #0
-:savetid        stx TilesetID
-                jsr UseTileset
-                jsr ConvertField
-                jsr DrawField
-                jsr DrawPiece
-end1Key         rts
+:savetid        stx TilesetID                   ; save tileset id
+                jsr UseTileset                  ; update tileset structure
+                jsr ConvertField                ; convert the field to new tileset
+                jsr DrawField                   ; redraw field
+                jsr DrawPiece                   ; redraw piece
+                jsr DrawNextPiece               ; as well as next piece
+:end1Key        rts
 ;
 ;
 ;

@@ -8,8 +8,10 @@
 ; TODO better locase/upcase key check
 ; TODO non arrow key repeat
 ; TODO fix splash regular ascii
+; TODO use word type for screen adresses
                 use macro/display
                 use macro/init
+                use macro/key
                 use macro/ptr
                 use macro/screen
                 use macro/speed
@@ -39,11 +41,12 @@ startRound      jsr NewPiece                    ; initialize this round
                 sta SpeedCount
                 jsr InitTryPieces
                 jsr DoesPieceFit                ; first check if it would fit
-                bcs roundLoop2                  ; it does, go on with the loop for this round
+                bcs :drawNext                   ; it does, go on and draw next piece
                 jmp GameOver                    ; it does not, game over!
+:drawNext       jsr DrawNextPiece               ; draw the next piece
+                bra :checkRefresh
 roundLoop       jsr InitTryPieces
-roundLoop2      jsr DrawNextPiece               ; draw the next piece once we know the current one fits
-                ldx FlagRefreshScr              ; check if we need to refresh the screen
+:checkRefresh   ldx FlagRefreshScr              ; check if we need to refresh the screen
                 beq checkFalling                ; no, go sleep a little
                 jsr DrawField                   ; refresh the screen
                 jsr DrawPiece

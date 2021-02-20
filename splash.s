@@ -26,7 +26,7 @@ SplashScreen    jsr HOME                        ; clear screen
                 ;jsr UseRegCharset
                 ;FIN
 ]loop           clc                             ; increment the 32bit seed
-                lda Rand
+                lda Rand                        ; TODO should be a macro
                 adc #1
                 sta Rand
                 lda Rand+1
