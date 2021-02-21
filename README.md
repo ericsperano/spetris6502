@@ -9,6 +9,21 @@ Largely based on this excellent tutorial from Javidx9 on how to write a text mod
 
 * https://github.com/OneLoneCoder/videos/blob/master/OneLoneCoder_Tetris.cpp
 
+## Build
+
+Install the [Merlin32](https://brutaldeluxe.fr/products/crossdevtools/merlin/) assembler from brutaldeluxe.fr
+
+Just run:
+
+    make
+
+And it will provide you a spetris.po (ProDOS disk) and a spetris.dsk (Old DOS) disks
+
+On each disk, there will be two binaries:
+
+1) `spetris`: Spetris with 65c02 opcodes and MouseText characters.
+2) `spetrisb`: 6502 opcodes only and regular ASCII characters.
+
 ## Other implementation
 
 For the Color Computer: https://github.com/esperano/spetris6809
