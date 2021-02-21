@@ -7,6 +7,7 @@
 ; TODO Blinking Press Any Key in splash screen (regular ascii)
 ; TODO non arrow key repeat
 ; TODO use word type for screen adresses
+; TODO make slower for real apple ii!
                 use macro/display
                 use macro/init
                 use macro/key
