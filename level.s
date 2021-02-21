@@ -20,7 +20,7 @@ CheckLevel      ldx LinesCount
                 cld                             ; clear decimal, speed limit is binary
                 sec                             ; set carry for substraction
                 lda SpeedLimit+1                ; speed lo byte
-                sbc #$20                        ; substract $20
+                sbc #$40                        ; substract chunk from speed limit
                 sta SpeedLimit+1
                 lda SpeedLimit                  ; speed hi byte
                 sbc #0

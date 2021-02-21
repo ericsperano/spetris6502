@@ -42,15 +42,19 @@ SplashScreen    jsr HOME                        ; clear screen
 ; Splash Screen strings
 ;
                 DO ]APPLE2E
-SplashTitle     dfb $8b,$04,16
+SplashTitle     da $048b
+                dfb 16,
                 asc "S P E T R // S !"
-SplashAuthor    dfb $88,$05,22
+SplashAuthor    da $0588
+                dfb 22
                 asc "By Eric Sperano (2021)"
-SplashForApl    dfb $85,$06,28
+SplashForApl    da $0685
+                dfb 28
                 asc "For The "
                 dfb $40
                 asc " Apple //e Computer"
-SplashGameCtrl  dfb $2f,$04,24
+SplashGameCtrl  da $042f
+                dfb 24
                 asc ' '
                 dfb $0b
                 asc 'eyboard '
@@ -58,27 +62,36 @@ SplashGameCtrl  dfb $2f,$04,24
                 asc 'ame '
                 dfb $03
                 asc 'ontrols '
-SplashKeyLeft   dfb $2f,$05,20
+SplashKeyLeft   da $052f
+                dfb 20,
                 dfb $48
                 asc " or B     Move Left"
-SplashKeyRight  dfb $af,$05,21
+SplashKeyRight  da $05af
+                dfb 21
                 dfb $55
                 asc " or M     Move Right"
-SplashKeyUp     dfb $2f,$06,17
+SplashKeyUp     da $062f
+                dfb 17
                 dfb $4b
                 asc " or H     Rotate"
-SplashKeyDown   dfb $af,$06,20
+SplashKeyDown   da $06af
+                dfb 20
                 dfb $4a
                 asc " or N     Move Down"
-SplashKeySpace  dfb $2f,$07,15
+SplashKeySpace  da $072f
+                dfb 15
                 asc "Space      Drop"
-SplashKeyP      dfb $d7,$04,16
+SplashKeyP      da $04d7
+                dfb 16
                 asc "P          Pause"
-SplashKey1      dfb $57,$05,24
+SplashKey1      da $0557
+                dfb 24
                 asc "1          Change Style!"
-SplashKeyEsc    dfb $57,$06,15
+SplashKeyEsc    da $0657
+                dfb 15
                 asc "Esc        Quit"
-SplashAnyKey    dfb $57,$07,24
+SplashAnyKey    da $0757
+                dfb 24
                 asc ' '
                 dfb $10
                 asc 'ress '
@@ -92,32 +105,46 @@ SplashAnyKey    dfb $57,$07,24
                 asc 'tart '
                 ELSE
                 ; APPLE II/II+
-SplashTitle     dfb $8b,$04,16
+SplashTitle     da $048b
+                dfb 16
                 asc "S P E T R ][ S !"
-SplashAuthor    dfb $88,$05,22
+SplashAuthor    da $0588
+                dfb 22
                 asc "BY ERIC SPERANO (2021)"
-SplashForApl    dfb $88,$06,22
+SplashForApl    da $0688
+                dfb 22
                 asc "FOR APPLE ][ COMPUTERS"
-SplashGameCtrl  dfb $2f,$04,24
+SplashGameCtrl  da $042f
+                dfb 24
                 inv " KEYBOARD GAME CONTROLS "
-SplashKeyLeft   dfb $2c,$05,28
+SplashKeyLeft   da $052c
+                dfb 28
                 asc "B OR LEFT ARROW    MOVE LEFT"
-SplashKeyRight  dfb $ac,$05,29
+SplashKeyRight  da $05ac
+                dfb 29
                 asc "M OR RIGHT ARROW   MOVE RIGHT"
-SplashKeyUp     dfb $2c,$06,25
+SplashKeyUp     da $062c
+                dfb 25
                 asc "A                  ROTATE"
-SplashKeyDown   dfb $ac,$06,28
+SplashKeyDown   da $06ac
+                dfb 28
                 asc "Z                  MOVE DOWN"
-SplashKeySpace  dfb $2c,$07,23
+SplashKeySpace  da $072c
+                dfb 23
                 asc "SPACE              DROP"
-SplashKeyP      dfb $d4,$04,24
+SplashKeyP      da $04d4
+                dfb 24
                 asc "P                  PAUSE"
-SplashKey1      dfb $54,$05,32
+SplashKey1      da $0554
+                dfb 32
                 asc "1                  CHANGE STYLE!"
-SplashKeyEsc    dfb $54,$06,23
+SplashKeyEsc    da $0654
+                dfb 23
                 asc "ESC                QUIT"
-SplashAnyKey    dfb $57,$07,24
+SplashAnyKey    da $0757
+                dfb 24
                 inv ' PRESS ANY KEY TO START '
                 FIN
-;SplashAnyKeyX   dfb $57,$07,24
+;SplashAnyKeyX   da $0757
+;                dfb 24
 ;                ds 24, ' '
