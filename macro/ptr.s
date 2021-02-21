@@ -16,3 +16,10 @@ CopyPtr         MAC
                 lda ]1
                 sta ]2
                 <<<
+;
+;
+;
+InitZeroTable   MAC
+                InitPtr PointsTable;PtrPoints   ; init constant zero page pointers
+                InitPtr Field;PtrField
+                <<<

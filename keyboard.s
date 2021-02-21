@@ -78,6 +78,3 @@ KeyPressed      sta STROBE
                 jsr DrawPiece                   ; redraw piece
                 jsr DrawNextPiece               ; as well as next piece
 :end1Key        rts
-;
-;
-;

@@ -5,31 +5,21 @@
 ; TODO Blinking game over (regular ascii)
 ; TODO Blinking Paused (regular ascii)
 ; TODO Blinking Press Any Key in splash screen (regular ascii)
+                ; Load Macros
                 use macro/display
                 use macro/init
                 use macro/key
                 use macro/ptr
                 use macro/screen
                 use macro/speed
+                ; Start Program
+                InitZeroTable
                 jsr SplashScreen                ; display screen and wait for a key press
                 InitRandom                      ; generate some random numbers
-                InitPtr PointsTable;PtrPoints   ; init constant zero page pointers
-                InitPtr Field;PtrField
 StartNewGame    jsr HOME                        ; clear screen
                 InitGame                        ; initialize new game
                 jsr InitField                   ; initialize clean field
-                JSRDisplayStr Title             ; display all the right side labels
-                JSRDisplayStr HighScoreL
-                JSRDisplayBCD HighScore
-                JSRDisplayStr ScoreL
-                JSRDisplayBCD Score
-                JSRDisplayStr LevelL
-                JSRDisplayBCD Level
-                JSRDisplayStr TotalPiecesL
-                JSRDisplayBCD TotalPieces
-                JSRDisplayStr TotalLinesL
-                JSRDisplayBCD TotalLines
-                JSRDisplayStr NextPieceL
+                DisplayStats
                 jsr NewPiece                    ; get 2 new piece at the start (current and next)
 startRound      jsr NewPiece                    ; initialize this round
                 lda #0                          ; reset SpeedCount
@@ -105,13 +95,17 @@ GameOver        jsr DrawField
                 AltCharSetOff
                 rts
 ;
+; Global Flags
 ;
+FlagRefreshScr  dfb 0           ; Will re-draw the whole field
+FlagQuitGame    dfb 0           ; Esc has been pressed and the user wants to quit the game
+FlagFalling     dfb 0           ; Space bar has been pressed and the piece is falling
+FlagForceDown   dfb 0           ; Time has expired and piece will go down one row
+;
+LinesCount      dfb 0           ; The number of lines detected after a piece is locked on the field
+;
+; General temporary variables
 ;
 tmp1            dfb 0
 tmp2            dfb 0
 tmp3            dfb 0
-LinesCount      dfb 0           ; lines count after lock piece
-FlagForceDown   dfb 0
-FlagRefreshScr  dfb 0
-FlagFalling     dfb 0
-FlagQuitGame    dfb 0
