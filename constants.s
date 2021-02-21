@@ -15,8 +15,8 @@ PtrDisplayStr   equ $fc         ; used by the DisplayStr routine
 ; box, lines, left bar, right bar, left corner, right corner, bottom bar, background
 TilesetSize     equ 9
 
-; Which lines the NextPieceY is displayed
-; TODO NextPieceX ?
+; col and row of where the next piece is displayed
+NextPieceX      equ 16
 NextPieceY      equ 12
 
 ;
@@ -40,16 +40,12 @@ KeySpace        equ $a0
 KeyEscape       equ $9b
 Key1            equ "1"
 Key2            equ "2"
-Keya            equ "a"
-KeyA            equ "A"
-Keyn            equ "n"
-KeyN            equ "N"
-Keyp            equ "p"
-KeyP            equ "P"
-Keyy            equ "y"
-KeyY            equ "Y"
-Keyz            equ "z"
-KeyZ            equ "Z"
+KeyB            equ "b"
+KeyH            equ "h"
+KeyM            equ "m"
+KeyN            equ "n"
+KeyP            equ "p"
+KeyY            equ "y"
 ;
 ;
 ;
@@ -65,3 +61,5 @@ PieceStructLen  equ 4 * PieceLen                  ; 4 different rotations
 ;
 ;
 SleepTime       equ $ff
+;
+SpeedLimitHi    equ $06

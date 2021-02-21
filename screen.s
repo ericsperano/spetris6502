@@ -21,48 +21,66 @@ SetScreenPos    phy
                 ply
                 rts
 ;
-;SSP_X           dfb 0 ; to rename X tmp TODO
-;
 ;
 ;
                 DO ]APPLE2E
-Title           dfb $93,$05,16
+Title           da $0593
+                dfb 16
                 asc "S P E T R // S !"
-HighScoreL      dfb $90,$06,11
+HighScoreL      da $0690
+                dfb 11
                 asc "High Score:"
-ScoreL          dfb $10,$07,6
+ScoreL          da $0710
+                dfb 6
                 asc "Score:"
-LevelL          dfb $90,$07,6
+LevelL          da $0790
+                dfb 6
                 asc "Level:"
-TotalPiecesL    dfb $38,$04,13
-                asc "Total Pieces:"
-TotalLinesL     dfb $b8,$04,12
-                asc "Total Lines:"
-NextPieceL      dfb $38,$06,11
+TotalPiecesL    da $0438
+                dfb 7
+                asc "Pieces:"
+TotalLinesL     da $04b8
+                dfb 6
+                asc "Lines:"
+NextPieceL      da $0638
+                dfb 11
                 asc "Next Piece:"
-NewGameL        dfb $dd,$06,13
+NewGameL        da $06dd
+                dfb 13
                 asc "New Game? Y/N"
-PausedL         dfb $de,$06,11
+PausedL         da $06de
+                dfb 11
                 asc "P A U S E D"
                 ELSE
-Title           dfb $93,$05,16
+Title           da $0593
+                dfb 16
                 asc "S P E T R ][ S !"
-HighScoreL      dfb $90,$06,11
+HighScoreL      da $0690
+                dfb 11
                 asc "HIGH SCORE:"
-ScoreL          dfb $10,$07,6
+ScoreL          da $0710
+                dfb 6
                 asc "SCORE:"
-LevelL          dfb $90,$07,6
+LevelL          da $0790
+                dfb 6
                 asc "LEVEL:"
-TotalPiecesL    dfb $38,$04,13
-                asc "TOTAL PIECES:"
-TotalLinesL     dfb $b8,$04,12
-                asc "TOTAL LINES:"
-NextPieceL      dfb $38,$06,11
+TotalPiecesL    da $0438
+                dfb 7
+                asc "PIECES:"
+TotalLinesL     da $04b8
+                dfb 6
+                asc "LINES:"
+NextPieceL      da $0638
+                dfb 11
                 asc "NEXT PIECE:"
-NewGameL        dfb $dd,$06,13
+NewGameL        da $06dd
+                dfb 13
                 asc "NEW GAME? Y/N"
-PausedL         dfb $de,$06,11
+PausedL         da $06de
+                dfb 11
                 asc "P A U S E D"
                 FIN
-PausedBlankL    dfb $de,$06,11
-                asc "           "
+;
+PausedBlankL    da $06de
+                dfb 11
+                ds 11, " "

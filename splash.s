@@ -20,13 +20,8 @@ SplashScreen    jsr HOME                        ; clear screen
                 lda #0
                 sta TilesetID
                 jsr UseTileset
-                ;DO ]APPLE2E
-                ;jsr UseMTCharset
-                ;ELSE
-                ;jsr UseRegCharset
-                ;FIN
 ]loop           clc                             ; increment the 32bit seed
-                lda Rand
+                lda Rand                        ; TODO should be a macro
                 adc #1
                 sta Rand
                 lda Rand+1
@@ -47,64 +42,109 @@ SplashScreen    jsr HOME                        ; clear screen
 ; Splash Screen strings
 ;
                 DO ]APPLE2E
-SplashTitle     dfb $8b,$04,16
+SplashTitle     da $048b
+                dfb 16,
                 asc "S P E T R // S !"
-SplashAuthor    dfb $88,$05,22
+SplashAuthor    da $0588
+                dfb 22
                 asc "By Eric Sperano (2021)"
-SplashForApl    dfb $87,$06,25
-                asc "For "
+SplashForApl    da $0685
+                dfb 28
+                asc "For The "
                 dfb $40
-                asc " Apple //e Computers"
-SplashGameCtrl  dfb $30,$04,22
-                asc "Keyboard Game Controls"
-SplashKeyUp     dfb $2f,$05,20
-                dfb $4b
-                asc " or A  Rotate Piece"
-SplashKeyLeft   dfb $af,$05,23
+                asc " Apple //e Computer"
+SplashGameCtrl  da $042f
+                dfb 24
+                asc ' '
+                dfb $0b
+                asc 'eyboard '
+                dfb $07
+                asc 'ame '
+                dfb $03
+                asc 'ontrols '
+SplashKeyLeft   da $052f
+                dfb 20,
                 dfb $48
-                asc "       Move Piece Left"
-SplashKeyRight  dfb $2f,$06,24
+                asc " or B     Move Left"
+SplashKeyRight  da $05af
+                dfb 21
                 dfb $55
-                asc "       Move Piece Right"
-SplashKeyDown   dfb $af,$06,23
+                asc " or M     Move Right"
+SplashKeyUp     da $062f
+                dfb 17
+                dfb $4b
+                asc " or H     Rotate"
+SplashKeyDown   da $06af
+                dfb 20
                 dfb $4a
-                asc " or Z  Move Piece Down"
-SplashKeySpace  dfb $2f,$07,18
-                asc "Space   Drop Piece"
-SplashKeyP      dfb $af,$07,18
-                asc "P       Pause Game"
-SplashKey1      dfb $57,$04,21
-                asc "1       Change Style!"
-SplashKeyEsc    dfb $D7,$04,17
-                asc "Esc     Quit Game"
-SplashAnyKey    dfb $d8,$06,22
-                asc "Press Any Key To Start"
+                asc " or N     Move Down"
+SplashKeySpace  da $072f
+                dfb 15
+                asc "Space      Drop"
+SplashKeyP      da $04d7
+                dfb 16
+                asc "P          Pause"
+SplashKey1      da $0557
+                dfb 24
+                asc "1          Change Style!"
+SplashKeyEsc    da $0657
+                dfb 15
+                asc "Esc        Quit"
+SplashAnyKey    da $0757
+                dfb 24
+                asc ' '
+                dfb $10
+                asc 'ress '
+                dfb $01
+                asc 'ny '
+                dfb $0b
+                asc 'ey '
+                dfb $14
+                asc 'o '
+                dfb $13
+                asc 'tart '
                 ELSE
                 ; APPLE II/II+
-SplashTitle     dfb $8b,$04,16
+SplashTitle     da $048b
+                dfb 16
                 asc "S P E T R ][ S !"
-SplashAuthor    dfb $88,$05,22
+SplashAuthor    da $0588
+                dfb 22
                 asc "BY ERIC SPERANO (2021)"
-SplashForApl    dfb $88,$06,22
+SplashForApl    da $0688
+                dfb 22
                 asc "FOR APPLE ][ COMPUTERS"
-SplashGameCtrl  dfb $30,$04,22
-                asc "KEYBOARD GAME CONTROLS"
-SplashKeyUp     dfb $2b,$05,29
-                asc "A                ROTATE PIECE"
-SplashKeyLeft   dfb $ab,$05,32
-                asc "LEFT ARROW       MOVE PIECE LEFT"
-SplashKeyRight  dfb $2b,$06,33
-                asc "RIGHT ARROW      MOVE PIECE RIGHT"
-SplashKeyDown   dfb $ab,$06,32
-                asc "Z                MOVE PIECE DOWN"
-SplashKeySpace  dfb $2b,$07,27
-                asc "SPACE            DROP PIECE"
-SplashKeyP      dfb $ab,$07,27
-                asc "P                PAUSE GAME"
-SplashKey1      dfb $53,$04,30
-                asc "1                CHANGE STYLE!"
-SplashKeyEsc    dfb $d3,$04,26
-                asc "ESC              QUIT GAME"
-SplashAnyKey    dfb $d8,$06,22
-                asc "PRESS ANY KEY TO START"
+SplashGameCtrl  da $042f
+                dfb 24
+                inv " KEYBOARD GAME CONTROLS "
+SplashKeyLeft   da $052c
+                dfb 28
+                asc "B OR LEFT ARROW    MOVE LEFT"
+SplashKeyRight  da $05ac
+                dfb 29
+                asc "M OR RIGHT ARROW   MOVE RIGHT"
+SplashKeyUp     da $062c
+                dfb 25
+                asc "A                  ROTATE"
+SplashKeyDown   da $06ac
+                dfb 28
+                asc "Z                  MOVE DOWN"
+SplashKeySpace  da $072c
+                dfb 23
+                asc "SPACE              DROP"
+SplashKeyP      da $04d4
+                dfb 24
+                asc "P                  PAUSE"
+SplashKey1      da $0554
+                dfb 32
+                asc "1                  CHANGE STYLE!"
+SplashKeyEsc    da $0654
+                dfb 23
+                asc "ESC                QUIT"
+SplashAnyKey    da $0757
+                dfb 24
+                inv ' PRESS ANY KEY TO START '
                 FIN
+;SplashAnyKeyX   da $0757
+;                dfb 24
+;                ds 24, ' '

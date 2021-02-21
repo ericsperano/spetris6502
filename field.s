@@ -337,21 +337,5 @@ dfTmpPosY       dfb 0
 Field           ds  210, 0    ; FieldCols * (FieldRows - 2)  2 because of the following 2
 FieldBottom     ds  28, 0     ; last line ptr so FieldCols + another FieldCols for bottom bar
 ; total field size is 14*17=238 so we can use an 8bit index
-; TODO use define word?
-FieldPositions  dfb $80,$05
-                dfb $00,$06
-                dfb $80,$06
-                dfb $00,$07
-                dfb $80,$07
-                dfb $28,$04
-                dfb $a8,$04
-                dfb $28,$05
-                dfb $a8,$05
-                dfb $28,$06
-                dfb $a8,$06
-                dfb $28,$07
-                dfb $a8,$07
-                dfb $50,$04
-                dfb $d0,$04
-                dfb $50,$05
-                dfb $d0,$05
+FieldPositions  da $0580, $0600, $0680, $0700, $0780, $0428, $04a8, $0528
+                da $05a8, $0628, $06a8, $0728, $07a8, $0450, $04d0, $0550, $05d0

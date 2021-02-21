@@ -1,13 +1,13 @@
 ; Spetris For the Apple ][+ and Apple //e Computers
 ; By Eric Sperano 2020-2021
 ;
-; TODO use FLS (flashing text), and REV.. consider STR too
+; TODO use FLS (flashing text), and inv.. consider STR/REV too
 ; TODO Blinking game over (regular ascii)
 ; TODO Blinking Paused (regular ascii)
 ; TODO Blinking Press Any Key in splash screen (regular ascii)
-;
                 use macro/display
                 use macro/init
+                use macro/key
                 use macro/ptr
                 use macro/screen
                 use macro/speed
@@ -37,11 +37,12 @@ startRound      jsr NewPiece                    ; initialize this round
                 sta SpeedCount
                 jsr InitTryPieces
                 jsr DoesPieceFit                ; first check if it would fit
-                bcs roundLoop2                  ; it does, go on with the loop for this round
+                bcs :drawNext                   ; it does, go on and draw next piece
                 jmp GameOver                    ; it does not, game over!
+:drawNext       jsr DrawNextPiece               ; draw the next piece
+                bra :checkRefresh
 roundLoop       jsr InitTryPieces
-roundLoop2      jsr DrawNextPiece               ; draw the next piece once we know the current one fits
-                ldx FlagRefreshScr              ; check if we need to refresh the screen
+:checkRefresh   ldx FlagRefreshScr              ; check if we need to refresh the screen
                 beq checkFalling                ; no, go sleep a little
                 jsr DrawField                   ; refresh the screen
                 jsr DrawPiece
@@ -58,7 +59,7 @@ pollKeyboard    lda KYBD                        ; polls keyboard
                 jsr KeyPressed                  ; go handle key pressed
                 ldx FlagQuitGame                ; esc pressed?
                 beq chkForceDown                ; no, go on
-                jmp exitGame                    ; yes, exit game
+                jmp :exitGame                   ; yes, exit game
 chkForceDown    ldx FlagForceDown               ; is it time for piece to go down?
                 bne moveDown                    ; yes
                 bra roundLoop                   ; no, loop
@@ -97,18 +98,11 @@ GameOver        jsr DrawField
                 cmp #$80                        ; key pressed?
                 bcc ]askNewGame                 ; no, keep polling
                 sta STROBE                      ; key pressed
-                cmp #Keyy                       ; check lower case y
-                bne :testKeyY                   ; no, keep checking
-                jmp StartNewGame                ; yes, start new game
-:testKeyY       cmp #KeyY                       ; check upper case Y
-                bne :testKeyn                   ; no, keep checking
-                jmp StartNewGame                ; yes, start new game
-:testKeyn       cmp #Keyn                       ; check lower case n
-                bne :testKeyN                   ; no, keep checking
-                bra exitGame                    ; yes, exit game
-:testKeyN       cmp #KeyN                       ; check upper case n
-                bne ]askNewGame                 ; no, loop
-exitGame        jsr HOME                        ; clear screen and exit
+                Check1Key KeyY;:doNewGame;:testKeyN
+:doNewGame      jmp StartNewGame                ; yes, start new game
+:testKeyN       Check1Key KeyN;:exitGame;]askNewGame
+:exitGame       jsr HOME                        ; clear screen and exit
+                AltCharSetOff
                 rts
 ;
 ;

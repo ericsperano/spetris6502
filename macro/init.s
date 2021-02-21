@@ -16,7 +16,7 @@ InitGame        MAC
                 sta TotalPiecesBCD+1
                 sta TotalPiecesBCD+2
                 sta SpeedLimit+1
-                lda #02
+                lda #SpeedLimitHi
                 sta SpeedLimit
                 lda #1
                 sta FlagRefreshScr

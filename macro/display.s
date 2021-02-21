@@ -25,3 +25,10 @@ JSRDisplayStr   MAC
                 InitPtr ]1;PtrDisplayStr
                 jsr DisplayStr
                 <<<
+;
+;
+;
+SetFlagRefresh  MAC
+                ldx #1                          ; and refresh screen
+                stx FlagRefreshScr
+                <<<
