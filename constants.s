@@ -62,4 +62,4 @@ PieceStructLen  equ 4 * PieceLen                  ; 4 different rotations
 ;
 SleepTime       equ $ff
 ;
-SpeedLimitHi    equ $06
+SpeedLimitHi    equ $05
