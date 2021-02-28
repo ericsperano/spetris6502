@@ -24,8 +24,8 @@ $(PRODOS_DSK): $(OBJ)
 
 $(DOS_DSK): $(OBJ)
 	$(AC) -dos140 $(DOS_DSK) SPETRIS
-	$(AC) -p $(DOS_DSK) spetris bin 0x2000 < spetris
-	$(AC) -p $(DOS_DSK) spetrisb bin 0x2000 < spetrisb
+	$(AC) -p $(DOS_DSK) spetris1 bin 0x2000 < spetris
+	$(AC) -p $(DOS_DSK) spetris2 bin 0x2000 < spetrisb
 
 run:
 	osascript "virtual_emulation.scpt"

@@ -51,9 +51,8 @@ KeyPressed      sta STROBE
                 stx FlagRefreshScr
                 rts
 ; Q Key ?
-:testQ          cmp #KeyQ                       ; is it the escape key?
-                bne :testP                      ; no keep searching
-                ldx #1                          ; yes, quit the game
+:testQ          Check1Key KeyQ;:doQ;:testP
+:doQ            ldx #1                          ; yes, quit the game
                 stx FlagQuitGame
                 rts
 ; P Key ?
