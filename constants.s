@@ -37,14 +37,15 @@ KeyRightArrow   equ $95
 KeyUpArrow      equ $8b
 KeyDownArrow    equ $8a
 KeySpace        equ $a0
-KeyEscape       equ $9b
-Key1            equ "1"
-Key2            equ "2"
-KeyB            equ "b"
-KeyH            equ "h"
-KeyM            equ "m"
+;KeyEscape       equ $9b
+KeyTab          equ $89
+;Key1            equ "1"
+;Key2            equ "2"
+KeyA            equ "a"
+KeyZ            equ "z"
 KeyN            equ "n"
 KeyP            equ "p"
+KeyQ            equ "q"
 KeyY            equ "y"
 ;
 ;

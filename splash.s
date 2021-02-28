@@ -65,19 +65,19 @@ SplashGameCtrl  da $042f
 SplashKeyLeft   da $052f
                 dfb 20,
                 dfb $48
-                asc " or B     Move Left"
+                asc "          Move Left"
 SplashKeyRight  da $05af
                 dfb 21
                 dfb $55
-                asc " or M     Move Right"
+                asc "          Move Right"
 SplashKeyUp     da $062f
                 dfb 17
                 dfb $4b
-                asc " or H     Rotate"
+                asc " or A     Rotate"
 SplashKeyDown   da $06af
                 dfb 20
                 dfb $4a
-                asc " or N     Move Down"
+                asc " or Z     Move Down"
 SplashKeySpace  da $072f
                 dfb 15
                 asc "Space      Drop"
@@ -86,10 +86,10 @@ SplashKeyP      da $04d7
                 asc "P          Pause"
 SplashKey1      da $0557
                 dfb 24
-                asc "1          Change Style!"
+                asc "Tab        Change Style!"
 SplashKeyEsc    da $0657
                 dfb 15
-                asc "Esc        Quit"
+                asc "Q          Quit"
 SplashAnyKey    da $0757
                 dfb 24
                 asc ' '
@@ -119,10 +119,10 @@ SplashGameCtrl  da $042f
                 inv " KEYBOARD GAME CONTROLS "
 SplashKeyLeft   da $052c
                 dfb 28
-                asc "B OR LEFT ARROW    MOVE LEFT"
+                asc "LEFT ARROW         MOVE LEFT"
 SplashKeyRight  da $05ac
                 dfb 29
-                asc "M OR RIGHT ARROW   MOVE RIGHT"
+                asc "RIGHT ARROW        MOVE RIGHT"
 SplashKeyUp     da $062c
                 dfb 25
                 asc "A                  ROTATE"
@@ -137,10 +137,10 @@ SplashKeyP      da $04d4
                 asc "P                  PAUSE"
 SplashKey1      da $0554
                 dfb 32
-                asc "1                  CHANGE STYLE!"
+                asc "TAB                CHANGE STYLE!"
 SplashKeyEsc    da $0654
                 dfb 23
-                asc "ESC                QUIT"
+                asc "Q                  QUIT"
 SplashAnyKey    da $0757
                 dfb 24
                 inv ' PRESS ANY KEY TO START '
