@@ -21,8 +21,8 @@ And it will provide you a spetris.po (ProDOS disk) and a spetris.dsk (Old DOS) d
 
 On each disk, there will be two binaries:
 
-1) `spetris`: Spetris with 65c02 opcodes and MouseText characters.
-2) `spetrisb`: 6502 opcodes only and regular ASCII characters.
+1) `spetris1`: Spetris with 65c02 opcodes and MouseText characters.
+2) `spetris2`: 6502 opcodes only and regular ASCII characters.
 
 ## Other implementation
 

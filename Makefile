@@ -19,8 +19,8 @@ spetrisb: $(SRC)
 
 $(PRODOS_DSK): $(OBJ)
 	$(AC) -pro140 $(PRODOS_DSK) SPETRIS
-	$(AC) -p $(PRODOS_DSK) spetris bin 0x2000 < spetris
-	$(AC) -p $(PRODOS_DSK) spetrisb bin 0x2000 < spetrisb
+	$(AC) -p $(PRODOS_DSK) spetris1 bin 0x2000 < spetris
+	$(AC) -p $(PRODOS_DSK) spetris2 bin 0x2000 < spetrisb
 
 $(DOS_DSK): $(OBJ)
 	$(AC) -dos140 $(DOS_DSK) SPETRIS
