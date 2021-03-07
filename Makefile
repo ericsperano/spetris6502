@@ -28,8 +28,10 @@ $(PRODOS_DSK): $(OBJ)
 	$(AC) -p $(PRODOS_DSK) mock.inf bin 0x9182 < soundtrack/mock.inf
 
 $(DOS_DSK): $(OBJ)
-	$(AC) -dos140 $(DOS_DSK) SPETRIS
+	#$(AC) -dos140 $(DOS_DSK) SPETRIS
+	cp bootblank.dsk.bkp $(DOS_DSK)
 	$(AC) -bas $(DOS_DSK) spetris < spetris.bas
+	$(AC) -bas $(DOS_DSK) spetris.bas < spetris.bas
 	$(AC) -p $(DOS_DSK) spetris1 bin 0x2000 < spetris
 	$(AC) -p $(DOS_DSK) spetris2 bin 0x2000 < spetrisb
 	$(AC) -p $(DOS_DSK) tetris1.mck bin 0x4e20 < soundtrack/tetris1.mck
