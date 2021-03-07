@@ -27,3 +27,7 @@ On each disk, there will be two binaries:
 ## Other implementation
 
 For the Color Computer: https://github.com/esperano/spetris6809
+
+## Soundtracks
+
+Big thanks to Tom Porter for providing 3 Tetris mockingboard soundtrack.
