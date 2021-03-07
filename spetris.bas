@@ -13,10 +13,10 @@
 410  PRINT "SPETRIS!" : PRINT
 420  PRINT "Select Mockingboard Soundtrack:" : PRINT : PRINT
 420  PRINT "1. Soundtrack A"
-430  PRINT "1. Soundtrack B"
-440  PRINT "1. Soundtrack C"
+430  PRINT "2. Soundtrack B"
+440  PRINT "3. Soundtrack C"
 450  PRINT "4. No Music"
-460  INPUT "Choice? ";A
+460  PRINT : INPUT "Choice? ";A
 470  IF A = 1  THEN ZA$ = "TETRIS1.MCK": GOTO 510
 480  IF A = 2  THEN ZA$ = "TETRIS2.MCK": GOTO 510
 490  IF A = 3  THEN ZA$ = "TETRIS3.MCK": GOTO 510
