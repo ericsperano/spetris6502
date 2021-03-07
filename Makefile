@@ -19,8 +19,12 @@ spetrisb: $(SRC)
 
 $(PRODOS_DSK): $(OBJ)
 	$(AC) -pro140 $(PRODOS_DSK) SPETRIS
+	$(AC) -bas $(PRODOS_DSK) spetris.bas < spetris.bas
 	$(AC) -p $(PRODOS_DSK) spetris1 bin 0x2000 < spetris
 	$(AC) -p $(PRODOS_DSK) spetris2 bin 0x2000 < spetrisb
+	$(AC) -p $(PRODOS_DSK) tetris1.mck bin 0x3a97 < sound/tetris1.mck
+	$(AC) -p $(PRODOS_DSK) tetris2.mck bin 0x3a97 < sound/tetris2.mck
+	$(AC) -p $(PRODOS_DSK) tetris3.mck bin 0x3a97 < sound/tetris3.mck
 
 $(DOS_DSK): $(OBJ)
 	$(AC) -dos140 $(DOS_DSK) SPETRIS
