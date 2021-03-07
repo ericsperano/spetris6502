@@ -1,5 +1,5 @@
 SHELL=/bin/bash -o pipefail
-AC:=java -jar ~/bin/AppleCommander-ac-1.6.0.jar
+AC:=applecommander
 PRODOS_DSK:=spetris.po
 DOS_DSK:=spetris.dsk
 ASM := Merlin32
