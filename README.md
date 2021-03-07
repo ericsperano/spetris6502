@@ -30,6 +30,4 @@ For the Color Computer: https://github.com/esperano/spetris6809
 
 ## Soundtracks
 
-Soundtrack provided by Tom Porter
-
-https://www.dropbox.com/s/hirmed07k8fmxaf/MIDI%20TO%20MOCK%20VER1.zip
+Big thanks to Tom Porter for providing 3 Tetris mockingboard soundtrack.
